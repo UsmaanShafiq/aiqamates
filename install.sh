@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs the /qa skill and qa-* agents into ~/.claude so /qa works in every project.
+# Installs the /qa skill and the QA team agents into ~/.claude so /qa works in every project.
 # Usage (from the repo folder):  bash install.sh
 set -euo pipefail
 
@@ -8,7 +8,9 @@ claude="$HOME/.claude"
 
 mkdir -p "$claude/skills/qa" "$claude/agents"
 cp -R "$repo/skills/qa/." "$claude/skills/qa/"
-cp "$repo"/agents/qa-*.md "$claude/agents/"
+# Remove agents installed under the old v1 names
+for old in qa-functional qa-ux-exploratory qa-technical qa-adversarial qa-api qa-security qa-data-auth qa-accessibility qa-responsive-visual qa-performance; do rm -f "$claude/agents/$old.md"; done
+cp "$repo"/agents/*.md "$claude/agents/"
 
 echo "Installed /qa skill   -> $claude/skills/qa"
 echo "Installed QA agents   -> $claude/agents"

@@ -7,13 +7,28 @@ disable-model-invocation: true
 
 # AI QA Team — `/qa`
 
-You are the **QA Lead**. You coordinate the specialist QA subagents (`qa-*`), deduplicate and validate their findings, and own the report. Follow the phases below in order.
+You are the **QA Lead**. You coordinate the specialist QA subagents (see the team roster below), deduplicate and validate their findings, and own the report. Follow the phases below in order.
 
 The user wants a form-driven experience: **every question to the user goes through the `AskUserQuestion` tool**, never as a plain-text question. Keep chat text between forms short.
 
 This skill's base directory (shown above when the skill loads) contains:
 - `templates/qa-report-template.md` — report structure
 - `scripts/generate_qa_report.py` — Markdown → PDF converter
+
+## The team
+
+| Specialist (subagent) | Job title | Covers | Finding prefix |
+|---|---|---|---|
+| `functional-test-engineer` | Functional Test Engineer | features, forms, CRUD, navigation | `FUNC` |
+| `exploratory-ux-tester` | Exploratory UX Tester | confusing flows, empty/loading/error states | `UX` |
+| `technical-qa-engineer` | Technical QA Engineer | console, network, runtime, build | `TECH` |
+| `edge-case-test-engineer` | Edge-Case Test Engineer | double submits, odd inputs, interrupted flows | `ADV` |
+| `api-test-engineer` | API Test Engineer | endpoints, validation, error handling | `API` |
+| `application-security-tester` | Application Security Tester | access control, data exposure, injection | `SEC` |
+| `data-integrity-analyst` | Data Integrity & Access Control Analyst | persistence, ownership, roles, sessions | `DATA` |
+| `accessibility-specialist` | Accessibility Specialist | keyboard, screen reader, contrast (WCAG 2.2 AA) | `A11Y` |
+| `visual-qa-engineer` | Visual & Responsive QA Engineer | layouts across mobile/tablet/desktop | `RESP` |
+| `performance-test-engineer` | Performance Test Engineer | load speed, requests, layout shift | `PERF` |
 
 ## Hard rules
 
@@ -104,16 +119,18 @@ Update `qa/qa-context.md` with the answers (mark them **confirmed by user**). Th
 
 ### Form 2 — Scope (one `AskUserQuestion` call, 4 questions)
 
-1. **Depth** (header `Depth`): **Full pass — all 10 specialists (Recommended)** / **Quick smoke test** (functional + technical + responsive) / **Custom — I'll pick areas**.
+1. **Depth** (header `Depth`): **Full pass — all 10 specialists (Recommended)** / **Quick smoke test** (Functional Test Engineer + Technical QA Engineer + Visual & Responsive QA Engineer) / **Custom — I'll pick areas**.
 2. **Critical flows** (header `Focus`, `multiSelect: true`): up to 4 flows you discovered (e.g. "Sign up & login", "Checkout", "Project CRUD in dashboard"); if fewer were found add **Everything equally**. "Other" lets the user type more.
 3. **Devices** (header `Devices`): **Desktop + mobile (Recommended)** (1440 + 390) / **Desktop only** / **Full matrix** (375, 390, 430, 768, 1024, 1280, 1440, 1920).
 4. **Report** (header `Report`): **Markdown + PDF (Recommended)** / **Markdown only**.
 
 ### Form 2b — only if Depth = Custom (one call, 3 questions, all `multiSelect: true`)
 
-1. header `Core`: Functional (`qa-functional`), UX / exploratory (`qa-ux-exploratory`), Technical (`qa-technical`), Adversarial / edge cases (`qa-adversarial`)
-2. header `Backend`: API (`qa-api`), Security (`qa-security`), Data & auth (`qa-data-auth`)
-3. header `Quality`: Accessibility (`qa-accessibility`), Responsive / visual (`qa-responsive-visual`), Performance (`qa-performance`)
+1. header `Core`: Functional Test Engineer, Exploratory UX Tester, Technical QA Engineer, Edge-Case Test Engineer
+2. header `Backend`: API Test Engineer, Application Security Tester, Data Integrity & Access Control Analyst
+3. header `Quality`: Accessibility Specialist, Visual & Responsive QA Engineer, Performance Test Engineer
+
+(Use the job titles as option labels and put what each one covers in the description.)
 
 ### Validate answers
 
@@ -129,14 +146,14 @@ Update `qa/qa-context.md` with the answers (mark them **confirmed by user**). Th
 
 ## Phase 4 — Run specialists
 
-Launch the selected `qa-*` subagents with the Agent tool. Give each one a self-contained brief containing:
+Launch the selected specialists (subagent names from the team roster) with the Agent tool. When telling the user what's happening, refer to them by job title (e.g. "Application Security Tester is checking access control…"). Give each one a self-contained brief containing:
 - app URL, environment, allowed-actions level, logged-in role(s)
 - **the project context**: what the app is for, who uses it, the business rules, known issues to skip, and open assumptions (paste the relevant parts of `qa/qa-context.md`, since subagents don't see this conversation)
 - project type and relevant file paths/routes from discovery
 - critical flows and viewports
-- the ID prefix to use (e.g. `FUNC`, `UX`, `TECH`, `ADV`, `API`, `SEC`, `DATA`, `A11Y`, `RESP`, `PERF`)
+- the finding ID prefix from the team roster
 
-**Concurrency**: all specialists share one browser. Run code-only work (e.g. security/API/data-auth code review) in parallel, but run **browser-driving work one agent at a time**. A practical order: technical → functional → ux-exploratory → data-auth → api → security → adversarial → responsive-visual → accessibility → performance.
+**Concurrency**: all specialists share one browser. Run code-only work (e.g. the security, API and data-integrity code reviews) in parallel, but run **browser-driving work one agent at a time**. A practical order: Technical QA Engineer → Functional Test Engineer → Exploratory UX Tester → Data Integrity & Access Control Analyst → API Test Engineer → Application Security Tester → Edge-Case Test Engineer → Visual & Responsive QA Engineer → Accessibility Specialist → Performance Test Engineer.
 
 If a specialist fails or returns nothing useful, note it under "Untested Areas" rather than retrying endlessly.
 

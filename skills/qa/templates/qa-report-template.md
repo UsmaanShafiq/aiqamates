@@ -19,18 +19,19 @@ What the app is, who uses it, and the business rules tested (from `qa/qa-context
 -
 
 ## Coverage
-| Area | Status | Notes |
-|---|---|---|
-| Functional | | |
-| UX | | |
-| Technical | | |
-| API | | |
-| Security | | |
-| Accessibility | | |
-| Responsive/Visual | | |
-| Performance | | |
-| Data/Auth | | |
-| Business rules | | |
+| Area | Specialist | Status | Notes |
+|---|---|---|---|
+| Functional | Functional Test Engineer | | |
+| UX | Exploratory UX Tester | | |
+| Technical | Technical QA Engineer | | |
+| API | API Test Engineer | | |
+| Security | Application Security Tester | | |
+| Accessibility | Accessibility Specialist | | |
+| Responsive/Visual | Visual & Responsive QA Engineer | | |
+| Performance | Performance Test Engineer | | |
+| Data/Auth | Data Integrity & Access Control Analyst | | |
+| Edge cases | Edge-Case Test Engineer | | |
+| Business rules | QA Lead | | |
 
 ## Issues Found
 ### P0

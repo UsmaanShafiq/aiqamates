@@ -1,6 +1,6 @@
 # AI QA Mates
 
-A reusable AI QA team for Claude Code. Type **`/qa`** in any project: Claude asks a few setup questions as clickable forms, runs 10 specialist QA agents against your app, writes a QA report (Markdown + PDF), then asks which issues to fix.
+A reusable AI QA team for Claude Code. Type **`/qa`** in any project: Claude asks a few setup questions as clickable forms, runs a team of 10 specialist QA agents against your app, writes a QA report (Markdown + PDF), then asks which issues to fix.
 
 Works best with:
 - Next.js / React / Tailwind SaaS
@@ -51,7 +51,23 @@ Your answers are saved in the project:
 | `skills/qa/SKILL.md` | The `/qa` command: forms, workflow and QA Lead rules |
 | `skills/qa/templates/qa-report-template.md` | Report structure |
 | `skills/qa/scripts/generate_qa_report.py` | Markdown → PDF converter |
-| `agents/qa-*.md` | Specialist subagents: functional, UX, technical, adversarial, API, security, data/auth, accessibility, responsive/visual, performance |
+| `agents/*.md` | The 10 specialist subagents (see The team) |
+
+## The team
+
+| Role | Agent | What they check |
+|---|---|---|
+| QA Lead | `/qa` skill | Plans the run, coordinates the team, validates findings, owns the report |
+| Functional Test Engineer | `functional-test-engineer` | Features, forms, CRUD, navigation, search, uploads |
+| Exploratory UX Tester | `exploratory-ux-tester` | Confusing flows, dead ends, empty/loading/error states |
+| Technical QA Engineer | `technical-qa-engineer` | Console errors, network failures, hydration, build/lint/types |
+| Edge-Case Test Engineer | `edge-case-test-engineer` | Double submits, odd inputs, multiple tabs, interrupted flows |
+| API Test Engineer | `api-test-engineer` | Endpoints, validation, status codes, error handling |
+| Application Security Tester | `application-security-tester` | Access control, data exposure, sessions, injection (non-destructive) |
+| Data Integrity & Access Control Analyst | `data-integrity-analyst` | Persistence, ownership, roles, login/logout |
+| Accessibility Specialist | `accessibility-specialist` | Keyboard, focus, labels, contrast (WCAG 2.2 AA) |
+| Visual & Responsive QA Engineer | `visual-qa-engineer` | Layouts on mobile, tablet and desktop |
+| Performance Test Engineer | `performance-test-engineer` | Load speed, heavy assets, request counts, layout shift |
 
 ## Workflow
 
