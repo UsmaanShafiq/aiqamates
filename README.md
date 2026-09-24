@@ -29,15 +29,20 @@ To update later: `git pull` and run the installer again.
 
 1. Open your project in Claude Code (a **new** session after installing).
 2. Type `/qa` (or `/qa http://localhost:3000` to skip the URL question).
-3. Answer the forms:
+3. Claude reads your project (README, docs, page copy, database schema, business logic, recent git changes) and shows you what it thinks the app is for. Confirm or correct it in the **Project context** form, and answer a few questions only you can answer (who can do what, pricing rules, what must never break, known bugs to skip).
+4. Answer the setup forms:
    - **Target**: app URL, environment (local / staging / production), login, allowed actions
    - **Scope**: full pass, quick smoke test or custom areas; critical flows; devices; report format
-4. If your app needs a login, Claude opens it in the browser and **you** sign in. Claude never types passwords.
-5. Read the report in `qa/qa-report.md` / `qa/qa-report.pdf`.
-6. Pick what to fix in the final form (all P0, all P1, specific IDs, or nothing).
-7. Claude fixes, retests, runs regression checks and writes the final report.
+5. If your app needs a login, Claude opens it in the browser and **you** sign in. Claude never types passwords.
+6. Read the report in `qa/qa-report.md` / `qa/qa-report.pdf`.
+7. Pick what to fix in the final form (all P0, all P1, specific IDs, or nothing).
+8. Claude fixes, retests, runs regression checks and writes the final report.
 
-Your answers are saved to `qa/qa-config.json`, so the next `/qa` run offers "Reuse last settings".
+Your answers are saved in the project:
+- `qa/qa-context.md`: what the app is, users and roles, business rules, known issues. **Edit it anytime** to teach the QA team about your app; items you confirmed are never asked again.
+- `qa/qa-config.json`: URL, environment and scope, so the next `/qa` run offers "Reuse last settings".
+
+**Tip:** the better your project's README (or `CLAUDE.md`) explains what the app does and for whom, the fewer questions `/qa` needs to ask.
 
 ## What's inside
 

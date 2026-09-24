@@ -12,6 +12,12 @@ PASS / PASS WITH KNOWN ISSUES / BLOCKED / INSUFFICIENT TESTING
 ## Executive Summary
 -
 
+## Project Context
+What the app is, who uses it, and the business rules tested (from `qa/qa-context.md`).
+
+### Assumptions not confirmed by the user
+-
+
 ## Coverage
 | Area | Status | Notes |
 |---|---|---|
@@ -24,6 +30,7 @@ PASS / PASS WITH KNOWN ISSUES / BLOCKED / INSUFFICIENT TESTING
 | Responsive/Visual | | |
 | Performance | | |
 | Data/Auth | | |
+| Business rules | | |
 
 ## Issues Found
 ### P0
