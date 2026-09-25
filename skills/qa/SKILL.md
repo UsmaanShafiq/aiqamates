@@ -47,6 +47,23 @@ This skill's base directory (shown above when the skill loads) contains:
 | P3 | Minor: cosmetic/UX issue in an important area, a11y issue with workaround |
 | P4 | Trivial: polish, copy, low-impact inconsistencies |
 
+## Live QA Office (the animated team view)
+
+The user watches the team work as pixel-art characters in a live "QA Office" page. It is driven by progress events you (and the specialists) log. Let `EV` be `python "<skill base dir>/scripts/qa_event.py"`, always run with the **Bash** tool from the project root.
+
+**At the very start of `/qa`, before Phase 1:**
+1. `EV --new-run "<project folder name>"`, which archives the previous run.
+2. Start the server **in the background** (Bash `run_in_background: true`): `python "<skill base dir>/scripts/qa_office.py"`. It prints the URL (default `http://localhost:4477`, next free port if busy) and writes it to `qa/live/office-url.txt`.
+3. Open that URL in the browser pane (`preview_start` with `url`). If no browser pane is available, print the URL in one line so the user can open it. If anything here fails, say so in one line and continue: the office is optional and must never block QA.
+4. Add `qa/live/` to the project's `.gitignore` if it has one and the entry is missing.
+
+**Log events as you go** (keep messages short, plain language, under ~60 characters, no secrets):
+- Each phase: `EV qa-lead phase "Reading the project" --phase discovery` (phases: `discovery`, `context`, `setup`, `plan`, `testing`, `report`, `fixing`, `final`).
+- Before every `AskUserQuestion` form: `EV qa-lead waiting "Waiting for your answers"`.
+- When launching a specialist: `EV <agent-name> working "<what they're about to check>"`; when it returns: `EV <agent-name> done "<N> findings"`. Log these yourself even if the specialist logged its own, so the office stays correct.
+- After validating findings in Phase 5, nothing extra is needed; specialists already logged their `found` events.
+- During fixes: `EV qa-lead working "Fixing QA-003: <title>"`. At the end: `EV qa-lead done "Release status: <STATUS>"`.
+
 ---
 
 ## Phase 1 — Silent discovery (no questions yet)
@@ -152,6 +169,7 @@ Launch the selected specialists (subagent names from the team roster) with the A
 - project type and relevant file paths/routes from discovery
 - critical flows and viewports
 - the finding ID prefix from the team roster
+- **the progress command** for the QA Office, with the full path filled in, e.g. `python "C:/Users/me/.claude/skills/qa/scripts/qa_event.py" api-test-engineer working "…"`
 
 **Concurrency**: all specialists share one browser. Run code-only work (e.g. the security, API and data-integrity code reviews) in parallel, but run **browser-driving work one agent at a time**. A practical order: Technical QA Engineer → Functional Test Engineer → Exploratory UX Tester → Data Integrity & Access Control Analyst → API Test Engineer → Application Security Tester → Edge-Case Test Engineer → Visual & Responsive QA Engineer → Accessibility Specialist → Performance Test Engineer.
 

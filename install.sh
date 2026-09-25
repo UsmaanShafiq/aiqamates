@@ -17,6 +17,7 @@ echo "Installed QA agents   -> $claude/agents"
 
 PY="$(command -v python3 || command -v python || true)"
 if [ -n "$PY" ]; then
+  "$PY" "$claude/skills/qa/scripts/setup_permissions.py"
   "$PY" -c "import reportlab" 2>/dev/null || { echo "Installing ReportLab for PDF reports..."; "$PY" -m pip install --quiet reportlab; }
 else
   echo "Python not found: PDF reports need Python + 'pip install reportlab'. Markdown reports still work."

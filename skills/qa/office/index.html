@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1b1a2e;
+    --floor-a: #2a2842;
+    --floor-b: #25233b;
+    --wall: #33305a;
+    --panel: #14132a;
+    --panel-edge: #4b4680;
+    --text: #efeaff;
+    --muted: #a39fc7;
+    --accent: #ffd166;
+    --ok: #5ee6a0;
+    --info: #6cb8ff;
+    --warn: #ffb057;
+    --bad: #ff5f7a;
+    --p0: #ff3b5c; --p1: #ff7a45; --p2: #ffc53d; --p3: #7cc4ff; --p4: #b8b3d9;
+    --bubble: #fffdf4;
+    --bubble-text: #1b1a2e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "VT323", ui-monospace, monospace;
+    font-size: 20px;
+    line-height: 1.15;
+    min-height: 100vh;
+  }
+  h1, .pixel { font-family: "Press Start 2P", ui-monospace, monospace; }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+    padding: 14px 16px; background: var(--panel); border-bottom: 4px solid var(--panel-edge);
+  }
+  h1 { font-size: 15px; margin: 0; color: var(--accent); letter-spacing: 1px; }
+  .project { color: var(--muted); }
+  .mode { font-family: "Press Start 2P", monospace; font-size: 9px; padding: 5px 7px; border: 2px solid currentColor; }
+  .mode.live { color: var(--ok); } .mode.demo { color: var(--accent); } .mode.replay { color: var(--info); } .mode.off { color: var(--muted); }
+  .counts { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  .count { font-family: "Press Start 2P", monospace; font-size: 9px; padding: 6px 7px; background: #0c0b1d; border: 2px solid; }
+  .count b { font-weight: normal; margin-left: 4px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  button, select {
+    font: inherit; font-size: 18px; color: var(--text); background: #2d2a55; border: 2px solid var(--panel-edge);
+    padding: 3px 10px; cursor: pointer;
+  }
+  button:hover, select:hover { border-color: var(--accent); }
+  button:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- phase stepper ---------- */
+  .phases { display: flex; gap: 4px; padding: 10px 16px; background: var(--wall); overflow-x: auto; }
+  .phase {
+    flex: 1 0 auto; text-align: center; padding: 6px 8px; font-size: 18px; color: var(--muted);
+    background: #26234a; border-bottom: 4px solid #26234a; white-space: nowrap;
+  }
+  .phase.done { color: var(--ok); border-bottom-color: var(--ok); }
+  .phase.now { color: var(--bubble-text); background: var(--accent); border-bottom-color: #c99a2e; }
+
+  /* ---------- layout ---------- */
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+  .office {
+    padding: 22px 16px 28px;
+    background-color: var(--floor-a);
+    background-image:
+      linear-gradient(45deg, var(--floor-b) 25%, transparent 25%, transparent 75%, var(--floor-b) 75%),
+      linear-gradient(45deg, var(--floor-b) 25%, transparent 25%, transparent 75%, var(--floor-b) 75%);
+    background-size: 48px 48px; background-position: 0 0, 24px 24px;
+    min-width: 0;
+  }
+  .lead-row { display: flex; justify-content: center; margin-bottom: 18px; }
+  .desks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 26px 16px; }
+
+  .station { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 58px; }
+  .station canvas { image-rendering: pixelated; image-rendering: crisp-edges; width: 160px; height: 140px; display: block; }
+  .station.lead canvas { width: 200px; height: 175px; }
+  .plate {
+    margin-top: 6px; text-align: center; background: var(--panel); border: 2px solid var(--panel-edge);
+    padding: 4px 8px 5px; width: 100%; max-width: 210px;
+  }
+  .plate .title { font-size: 18px; color: var(--text); }
+  .plate .status { font-size: 16px; color: var(--muted); display: flex; justify-content: center; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; display: inline-block; background: var(--muted); }
+  .st-working .dot { background: var(--ok); animation: blink 0.8s steps(2) infinite; }
+  .st-found .dot { background: var(--bad); }
+  .st-waiting .dot { background: var(--accent); animation: blink 1.2s steps(2) infinite; }
+  .st-blocked .dot { background: var(--warn); }
+  .st-done .dot { background: var(--info); }
+  .findings { display: flex; gap: 3px; justify-content: center; margin-top: 3px; min-height: 12px; flex-wrap: wrap; }
+  .findings i { width: 10px; height: 10px; display: inline-block; }
+
+  .bubble {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: max-content; max-width: 200px; background: var(--bubble); color: var(--bubble-text);
+    border: 3px solid #0c0b1d; padding: 4px 8px; font-size: 17px; line-height: 1.05;
+    box-shadow: 3px 3px 0 #0c0b1d; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .bubble.show { opacity: 1; }
+  .bubble.alert { background: #ffe1e6; }
+  .emote {
+    position: absolute; top: 60px; left: calc(50% - 44px); font-family: "Press Start 2P", monospace; font-size: 16px;
+    text-shadow: 2px 2px 0 #0c0b1d; opacity: 0; pointer-events: none;
+  }
+  .station.lead .emote { left: calc(50% - 56px); }
+  .emote.show { opacity: 1; animation: pop 0.6s steps(3) infinite alternate; }
+
+  @media (max-width: 480px) {
+    .desks { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 10px; }
+    .station { padding-top: 64px; }
+    .station canvas { width: 128px; height: 112px; }
+    .plate .title { font-size: 16px; }
+    .bubble { max-width: 150px; font-size: 15px; }
+    .emote { top: 64px; left: calc(50% - 40px); }
+  }
+
+  @keyframes blink { 50% { opacity: 0.2; } }
+  @keyframes pop { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+  /* ---------- feed ---------- */
+  aside { background: var(--panel); border-left: 4px solid var(--panel-edge); display: flex; flex-direction: column; min-height: 0; }
+  @media (max-width: 900px) { aside { border-left: 0; border-top: 4px solid var(--panel-edge); } }
+  aside h2 { font-family: "Press Start 2P", monospace; font-size: 10px; margin: 0; padding: 14px 14px 10px; color: var(--accent); }
+  .feed { list-style: none; margin: 0; padding: 0 14px 14px; overflow-y: auto; max-height: calc(100vh - 170px); }
+  @media (max-width: 900px) { .feed { max-height: 360px; } }
+  .feed li { padding: 6px 0 7px; border-bottom: 2px dashed #2d2a55; font-size: 18px; }
+  .feed .who { color: var(--accent); }
+  .feed .time { color: var(--muted); font-size: 15px; float: right; }
+  .feed .sev { font-family: "Press Start 2P", monospace; font-size: 8px; padding: 2px 3px; color: #0c0b1d; margin-right: 4px; }
+  .empty { color: var(--muted); padding: 10px 14px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot, .emote.show { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>QA OFFICE</h1>
+  <span class="project" id="project">Waiting for a QA run…</span>
+  <span class="mode off" id="mode">OFFLINE</span>
+  <div class="counts" id="counts"></div>
+  <div class="controls">
+    <select id="runs" aria-label="Choose a run to view"><option value="">Current run</option></select>
+    <button id="replay" type="button">Replay</button>
+    <button id="demo" type="button">Demo</button>
+  </div>
+</header>
+<nav class="phases" id="phases" aria-label="QA phases"></nav>
+<main>
+  <section class="office" aria-label="The QA team at work">
+    <div class="lead-row" id="lead-row"></div>
+    <div class="desks" id="desks"></div>
+  </section>
+  <aside aria-label="Activity feed">
+    <h2>ACTIVITY</h2>
+    <ul class="feed" id="feed"></ul>
+  </aside>
+</main>
+
+<script>
+/* ============================================================
+   Team roster: look = pixel-art appearance
+   ============================================================ */
+const TEAM = [
+  { id: "qa-lead", title: "QA Lead", short: "Lead",
+    look: { skin: "#c68a5a", hair: "#2a1b12", style: "short", shirt: "#3c4a8c", acc: "tie", accColor: "#e0364f" } },
+  { id: "functional-test-engineer", title: "Functional Test Engineer", short: "Functional",
+    look: { skin: "#f1c7a0", hair: "#7a4a22", style: "short", shirt: "#2f9e6e", acc: "none" } },
+  { id: "exploratory-ux-tester", title: "Exploratory UX Tester", short: "UX",
+    look: { skin: "#e0a878", hair: "#c9432e", style: "long", shirt: "#f08bb4", acc: "beret", accColor: "#5b3f9e" } },
+  { id: "technical-qa-engineer", title: "Technical QA Engineer", short: "Technical",
+    look: { skin: "#8d5a3b", hair: "#15110e", style: "short", shirt: "#3a3f4b", acc: "headphones", accColor: "#26d0ce" } },
+  { id: "edge-case-test-engineer", title: "Edge-Case Test Engineer", short: "Edge-Case",
+    look: { skin: "#f5d0b0", hair: "#f2c230", style: "spiky", shirt: "#e8612c", acc: "none" } },
+  { id: "api-test-engineer", title: "API Test Engineer", short: "API",
+    look: { skin: "#d9a066", hair: "#3b2a20", style: "short", shirt: "#4e7fd6", acc: "glasses" } },
+  { id: "application-security-tester", title: "Application Security Tester", short: "Security",
+    look: { skin: "#b5794c", hair: "#111", style: "short", shirt: "#23252f", acc: "hood", accColor: "#23252f" } },
+  { id: "data-integrity-analyst", title: "Data Integrity & Access Control Analyst", short: "Data",
+    look: { skin: "#f0bf94", hair: "#4a2c1a", style: "bun", shirt: "#8f5bd6", acc: "glasses" } },
+  { id: "accessibility-specialist", title: "Accessibility Specialist", short: "A11y",
+    look: { skin: "#6b4228", hair: "#0f0b09", style: "long", shirt: "#f2a33a", acc: "none" } },
+  { id: "visual-qa-engineer", title: "Visual & Responsive QA Engineer", short: "Visual",
+    look: { skin: "#f3cfae", hair: "#e57fb0", style: "long", shirt: "#2bb3b1", acc: "headband", accColor: "#ffffff" } },
+  { id: "performance-test-engineer", title: "Performance Test Engineer", short: "Performance",
+    look: { skin: "#a86b45", hair: "#1c140f", style: "short", shirt: "#d9433b", acc: "headband", accColor: "#ffd166" } },
+];
+const PHASES = [
+  ["discovery", "Discovery"], ["context", "Context"], ["setup", "Setup"], ["plan", "Plan"],
+  ["testing", "Testing"], ["report", "Report"], ["fixing", "Fixing"], ["final", "Final"],
+];
+const SEVS = ["P0", "P1", "P2", "P3", "P4"];
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ============================================================
+   State
+   ============================================================ */
+const agents = {};
+let phase = null, totals = {}, feedItems = [];
+
+function resetState() {
+  for (const m of TEAM) {
+    agents[m.id] = { ...m, state: "idle", msg: "", changedAt: -1e9, foundAt: -1e9, findings: [] };
+  }
+  phase = null;
+  totals = Object.fromEntries(SEVS.map((s) => [s, 0]));
+  feedItems = [];
+}
+function agentFor(id) {
+  if (!agents[id]) {  // unknown agent: give it a desk anyway
+    const m = { id, title: id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), short: id,
+      look: { skin: "#d9a066", hair: "#333", style: "short", shirt: "#777", acc: "none" } };
+    TEAM.push(m);
+    agents[id] = { ...m, state: "idle", msg: "", changedAt: -1e9, foundAt: -1e9, findings: [] };
+    buildStation(m);
+  }
+  return agents[id];
+}
+
+function applyEvent(ev) {
+  const now = performance.now();
+  if (ev.state === "run") {
+    resetState();
+    document.getElementById("project").textContent = ev.msg || "QA run";
+    rebuildBadges();
+    addFeed(ev, `Started a QA run${ev.msg ? " on " + ev.msg : ""}`);
+    return;
+  }
+  const a = agentFor(ev.agent || "qa-lead");
+  if (ev.state === "phase") {
+    phase = ev.phase || phase;
+    a.state = "working"; a.msg = ev.msg || "";
+    a.changedAt = now;
+    addFeed(ev, ev.msg || `Phase: ${phase}`);
+    return;
+  }
+  if (ev.state === "found") {
+    const sev = SEVS.includes(ev.severity) ? ev.severity : "P3";
+    a.findings.push(sev); totals[sev]++;
+    a.foundAt = now; a.state = "found"; a.msg = `Found ${sev}: ${ev.msg}`;
+    addFeed(ev, ev.msg, sev);
+    return;
+  }
+  if (ev.state !== a.state) a.changedAt = now;
+  a.state = ev.state; a.msg = ev.msg || "";
+  if (ev.phase) phase = ev.phase;
+  addFeed(ev, ev.msg || ev.state);
+}
+
+/* ============================================================
+   Pixel-art sprites (32 x 28 logical pixels)
+   ============================================================ */
+function R(ctx, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 + amt))));
+  return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+function seedRand(seed) { let s = seed; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
+
+function drawAgent(ctx, a, t) {
+  const L = a.look, S = a.state;
+  ctx.clearRect(0, 0, 32, 28);
+  const since = t - a.changedAt;
+  const jumping = S === "done" && since < 1500;
+  const dy = jumping ? -Math.round(Math.abs(Math.sin(since / 140)) * 2) : 0;
+  const found = t - a.foundAt < 3000;
+
+  // chair
+  R(ctx, 4, 9, 16, 11, "#3b3560"); R(ctx, 4, 9, 16, 1, "#4d467a");
+
+  // body + arms
+  R(ctx, 6, 12 + dy, 12, 8, L.shirt);
+  R(ctx, 6, 12 + dy, 12, 1, shade(L.shirt, 0.15));
+  if (L.acc === "tie") { R(ctx, 11, 12 + dy, 2, 1, "#fff"); R(ctx, 11, 13 + dy, 2, 5, L.accColor); }
+  R(ctx, 10, 11 + dy, 4, 1, shade(L.skin, -0.2));
+  const typing = S === "working" || S === "found";
+  const tick = Math.floor(t / 140) % 2;
+  const lh = typing && tick === 0 ? -1 : 0, rh = typing && tick === 1 ? -1 : 0;
+  R(ctx, 4, 13 + dy, 2, 5, shade(L.shirt, -0.12)); R(ctx, 18, 13 + dy, 2, 5, shade(L.shirt, -0.12));
+  R(ctx, 5, 18 + lh, 3, 1, L.skin); R(ctx, 16, 18 + rh, 3, 1, L.skin);
+
+  // hood (behind head)
+  if (L.acc === "hood") { R(ctx, 6, 2 + dy, 12, 10, L.accColor); R(ctx, 6, 2 + dy, 12, 1, shade(L.accColor, 0.3)); }
+
+  // head
+  R(ctx, 7, 3 + dy, 10, 8, L.skin);
+  R(ctx, 7, 10 + dy, 10, 1, shade(L.skin, -0.12));
+
+  // hair
+  const H = L.hair;
+  if (L.acc !== "hood") {
+    if (L.style === "long") { R(ctx, 6, 3 + dy, 2, 10, H); R(ctx, 16, 3 + dy, 2, 10, H); }
+    R(ctx, 7, 2 + dy, 10, 2, H); R(ctx, 7, 4 + dy, 1, 2, H); R(ctx, 16, 4 + dy, 1, 2, H);
+    if (L.style === "spiky") { R(ctx, 8, 1 + dy, 1, 1, H); R(ctx, 10, 0 + dy, 1, 2, H); R(ctx, 12, 1 + dy, 1, 1, H); R(ctx, 14, 0 + dy, 1, 2, H); }
+    if (L.style === "bun") { R(ctx, 10, 0 + dy, 4, 2, H); }
+  } else {
+    R(ctx, 8, 3 + dy, 8, 1, H);
+  }
+
+  // accessories on head
+  if (L.acc === "beret") { R(ctx, 6, 1 + dy, 11, 2, L.accColor); R(ctx, 14, 0 + dy, 2, 1, L.accColor); }
+  if (L.acc === "headband") { R(ctx, 7, 4 + dy, 10, 1, L.accColor); }
+  if (L.acc === "headphones") { R(ctx, 7, 1 + dy, 10, 1, "#222"); R(ctx, 6, 1 + dy, 1, 4, "#222"); R(ctx, 17, 1 + dy, 1, 4, "#222");
+    R(ctx, 5, 5 + dy, 2, 4, L.accColor); R(ctx, 17, 5 + dy, 2, 4, L.accColor); }
+
+  // eyes (blink every few seconds, offset per agent)
+  const blink = ((t + a.id.length * 997) % 3600) < 130;
+  const eyeC = "#1b1a2e";
+  if (!blink) { R(ctx, 9, 6 + dy, 1, 2, eyeC); R(ctx, 14, 6 + dy, 1, 2, eyeC); }
+  else { R(ctx, 9, 7 + dy, 1, 1, eyeC); R(ctx, 14, 7 + dy, 1, 1, eyeC); }
+  if (L.acc === "glasses") { const g = "#1b1a2e"; R(ctx, 8, 5 + dy, 3, 1, g); R(ctx, 13, 5 + dy, 3, 1, g); R(ctx, 11, 6 + dy, 2, 1, g);
+    R(ctx, 8, 8 + dy, 3, 1, g); R(ctx, 13, 8 + dy, 3, 1, g); R(ctx, 8, 6 + dy, 1, 2, g); R(ctx, 15, 6 + dy, 1, 2, g); }
+
+  // mouth
+  const m = shade(L.skin, -0.45);
+  if (S === "done") { R(ctx, 10, 8 + dy, 1, 1, m); R(ctx, 11, 9 + dy, 2, 1, m); R(ctx, 13, 8 + dy, 1, 1, m); }
+  else if (found) { R(ctx, 11, 8 + dy, 2, 2, m); }
+  else if (S === "blocked") { R(ctx, 11, 9 + dy, 2, 1, m); R(ctx, 10, 10 + dy, 1, 1, m); R(ctx, 13, 10 + dy, 1, 1, m); }
+  else { R(ctx, 11, 9 + dy, 2, 1, m); }
+
+  // desk
+  R(ctx, 1, 19, 30, 2, "#a8693c"); R(ctx, 1, 19, 30, 1, "#c98a55");
+  R(ctx, 2, 21, 28, 7, "#7a4a28"); R(ctx, 2, 21, 28, 1, "#5d3820");
+  R(ctx, 14, 23, 5, 1, "#c98a55");
+  // keyboard
+  R(ctx, 6, 18, 12, 1, "#d6d3e8");
+
+  // monitor
+  R(ctx, 20, 8, 11, 10, "#26243a"); R(ctx, 24, 18, 3, 1, "#26243a");
+  drawScreen(ctx, a, t, found);
+
+  // mug
+  R(ctx, 2, 16, 3, 3, "#f4f1ff"); R(ctx, 5, 17, 1, 1, "#f4f1ff");
+}
+
+function drawScreen(ctx, a, t, found) {
+  const x = 21, y = 9, w = 9, h = 8, S = a.state;
+  if (found && Math.floor(t / 250) % 2 === 0) { R(ctx, x, y, w, h, "#b3203c"); R(ctx, x + 4, y + 1, 1, 4, "#fff"); R(ctx, x + 4, y + 6, 1, 1, "#fff"); return; }
+  if (S === "working" || S === "found") {
+    R(ctx, x, y, w, h, "#0d3b2c");
+    const rnd = seedRand(a.id.length * 31 + Math.floor(t / 180));
+    for (let r = 0; r < h; r++) { const len = 1 + Math.floor(rnd() * 7); R(ctx, x + 1, y + r, len, 1, r % 3 ? "#5ee6a0" : "#b7ffd9"); }
+    return;
+  }
+  if (S === "done") { R(ctx, x, y, w, h, "#18407a"); const c = "#8fd0ff";
+    R(ctx, x + 2, y + 4, 1, 1, c); R(ctx, x + 3, y + 5, 1, 1, c); R(ctx, x + 4, y + 4, 1, 1, c); R(ctx, x + 5, y + 3, 1, 1, c); R(ctx, x + 6, y + 2, 1, 1, c); return; }
+  if (S === "waiting") { R(ctx, x, y, w, h, "#4a3b0c"); const on = Math.floor(t / 400) % 2; if (on) { R(ctx, x + 3, y + 2, 3, 1, "#ffd166"); R(ctx, x + 5, y + 3, 1, 1, "#ffd166"); R(ctx, x + 4, y + 4, 1, 1, "#ffd166"); R(ctx, x + 4, y + 6, 1, 1, "#ffd166"); } return; }
+  if (S === "blocked") { R(ctx, x, y, w, h, "#5a2d0c"); R(ctx, x + 2, y + 3, 5, 2, "#ffb057"); return; }
+  R(ctx, x, y, w, h, "#161528"); R(ctx, x + 1, y + 1, 2, 1, "#2b2950");
+}
+
+/* ============================================================
+   DOM
+   ============================================================ */
+const stations = {};
+function buildStation(m) {
+  const el = document.createElement("div");
+  el.className = "station" + (m.id === "qa-lead" ? " lead" : "");
+  el.innerHTML = `
+    <div class="bubble" aria-live="polite"></div>
+    <div class="emote" aria-hidden="true"></div>
+    <canvas width="32" height="28" role="img" aria-label="${m.title}"></canvas>
+    <div class="plate"><div class="title">${m.title}</div>
+      <div class="status"><span class="dot"></span><span class="label">Idle</span></div>
+      <div class="findings"></div></div>`;
+  (m.id === "qa-lead" ? document.getElementById("lead-row") : document.getElementById("desks")).appendChild(el);
+  const ctx = el.querySelector("canvas").getContext("2d");
+  stations[m.id] = { el, ctx, bubble: el.querySelector(".bubble"), emote: el.querySelector(".emote"),
+    label: el.querySelector(".label"), findings: el.querySelector(".findings"), lastMsg: null, lastState: null, lastCount: -1 };
+}
+const STATE_LABEL = { idle: "Idle", working: "Working", found: "Found a bug!", waiting: "Waiting for you", blocked: "Blocked", done: "Done" };
+
+function renderStations(t) {
+  for (const id in agents) {
+    const a = agents[id], s = stations[id];
+    if (!s) continue;
+    drawAgent(s.ctx, a, t);
+    const found = t - a.foundAt < 3000;
+    const shownState = found ? "found" : (a.state === "found" ? "working" : a.state);
+    if (s.lastState !== shownState) {
+      s.el.className = s.el.className.replace(/\bst-\S+/g, "").trim() + " st-" + shownState;
+      s.label.textContent = STATE_LABEL[shownState] || shownState;
+      s.lastState = shownState;
+    }
+    if (s.lastMsg !== a.msg) { s.bubble.textContent = a.msg; s.lastMsg = a.msg; }
+    s.bubble.classList.toggle("show", !!a.msg && a.state !== "idle");
+    s.bubble.classList.toggle("alert", found);
+    const emo = found ? ["!", css("--bad")] : a.state === "waiting" ? ["?", css("--accent")]
+      : a.state === "done" && t - a.changedAt < 4000 ? ["✓", css("--ok")] : a.state === "blocked" ? ["…", css("--warn")] : null;
+    s.emote.classList.toggle("show", !!emo);
+    if (emo) { s.emote.textContent = emo[0]; s.emote.style.color = emo[1]; }
+    if (s.lastCount !== a.findings.length) {
+      s.findings.innerHTML = a.findings.map((v) => `<i title="${v}" style="background:var(--${v.toLowerCase()})"></i>`).join("");
+      s.lastCount = a.findings.length;
+    }
+  }
+}
+
+function rebuildBadges() {
+  document.getElementById("counts").innerHTML = SEVS.map((s) =>
+    `<span class="count" style="border-color:var(--${s.toLowerCase()});color:var(--${s.toLowerCase()})">${s}<b>${totals[s]}</b></span>`).join("");
+  const idx = PHASES.findIndex((p) => p[0] === phase);
+  document.getElementById("phases").innerHTML = PHASES.map(([k, label], i) =>
+    `<div class="phase ${i < idx ? "done" : i === idx ? "now" : ""}">${label}</div>`).join("");
+}
+
+function addFeed(ev, text, sev) {
+  const a = agents[ev.agent] || agents["qa-lead"];
+  feedItems.unshift({ who: a ? a.short : ev.agent, text, sev, time: (ev.t || "").slice(11, 16) });
+  if (feedItems.length > 200) feedItems.length = 200;
+  feedDirty = true;
+}
+let feedDirty = true;
+function renderFeed() {
+  if (!feedDirty) return;
+  feedDirty = false;
+  const ul = document.getElementById("feed");
+  if (!feedItems.length) { ul.innerHTML = `<li class="empty">No activity yet. Type /qa in Claude Code, or press Demo.</li>`; return; }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  ul.innerHTML = feedItems.map((f) => `<li><span class="time">${f.time}</span><span class="who">${esc(f.who)}</span>: ${
+    f.sev ? `<span class="sev" style="background:var(--${f.sev.toLowerCase()})">${f.sev}</span>` : ""}${esc(f.text)}</li>`).join("");
+}
+
+/* ============================================================
+   Data sources: live polling, replay, demo
+   ============================================================ */
+let mode = "off", since = 0, pollTimer = null, playTimer = null, selectedRun = "";
+function setMode(m, label) {
+  mode = m;
+  const el = document.getElementById("mode");
+  el.className = "mode " + m; el.textContent = label;
+}
+function stopAll() { clearTimeout(pollTimer); clearTimeout(playTimer); }
+function loadAll(events) { resetState(); events.forEach(applyEvent); rebuildBadges(); feedDirty = true; }
+
+async function poll() {
+  try {
+    const r = await fetch(`events?since=${since}${selectedRun ? "&run=" + encodeURIComponent(selectedRun) : ""}`, { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    if (data.total < since) { since = 0; resetState(); }  // new run replaced the file
+    if (since === 0 && !data.events.length) document.getElementById("project").textContent = `${data.project}: waiting for /qa…`;
+    data.events.forEach(applyEvent);
+    if (data.events.length) rebuildBadges();
+    since = data.total;
+    if (mode !== "live") setMode("live", selectedRun ? "SAVED RUN" : "LIVE");
+    if (!selectedRun) pollTimer = setTimeout(poll, 1000);
+    return true;
+  } catch {
+    if (mode === "live" || mode === "off") setMode("off", "OFFLINE");
+    pollTimer = setTimeout(poll, 3000);
+    return false;
+  }
+}
+
+async function loadRuns() {
+  try {
+    const runs = await (await fetch("runs", { cache: "no-store" })).json();
+    const sel = document.getElementById("runs");
+    sel.innerHTML = `<option value="">Current run</option>` + runs.map((r) => `<option value="${r}">${r.replace(".jsonl", "").replace("_", " ")}</option>`).join("");
+  } catch {}
+}
+
+function play(events, label) {
+  stopAll(); resetState(); rebuildBadges(); setMode(label === "DEMO" ? "demo" : "replay", label);
+  let i = 0;
+  const step = () => {
+    if (i >= events.length) { if (label === "DEMO") setMode("demo", "DEMO DONE"); else setMode("replay", "REPLAY DONE"); return; }
+    const d = new Date();
+    applyEvent({ ...events[i], t: events[i].t || d.toISOString().slice(0, 11) + d.toTimeString().slice(0, 8) });
+    rebuildBadges(); i++;
+    playTimer = setTimeout(step, events[i - 1].state === "found" ? 1400 : 900);
+  };
+  step();
+}
+
+async function replay() {
+  try {
+    const r = await fetch(`events?since=0${selectedRun ? "&run=" + encodeURIComponent(selectedRun) : ""}`, { cache: "no-store" });
+    const data = await r.json();
+    if (data.events.length) play(data.events, "REPLAY"); else alert("Nothing to replay yet.");
+  } catch { alert("Replay needs the QA Office server (python qa_office.py)."); }
+}
+
+function demoEvents() {
+  const E = (agent, state, msg, extra = {}) => ({ agent, state, msg, ...extra });
+  return [
+    E("qa-lead", "run", "demo-saas-app"),
+    E("qa-lead", "phase", "Reading README, schema and recent changes", { phase: "discovery" }),
+    E("qa-lead", "phase", "Here's what I think this app does. Is it right?", { phase: "context" }),
+    E("qa-lead", "waiting", "Waiting for your answers in the form"),
+    E("qa-lead", "phase", "Got it! Setting up the target and scope", { phase: "setup" }),
+    E("qa-lead", "phase", "Writing the test plan: 42 scenarios", { phase: "plan" }),
+    E("qa-lead", "phase", "Team, let's go! Testing starts now", { phase: "testing" }),
+    E("technical-qa-engineer", "working", "Watching the console on the dashboard"),
+    E("application-security-tester", "working", "Reviewing route protection in middleware.ts"),
+    E("api-test-engineer", "working", "Mapping 14 API routes"),
+    E("technical-qa-engineer", "found", "Hydration mismatch on /dashboard", { severity: "P2" }),
+    E("functional-test-engineer", "working", "Testing sign up with a new email"),
+    E("api-test-engineer", "found", "GET /api/projects/999 returns 500, not 404", { severity: "P3" }),
+    E("application-security-tester", "found", "Other users' invoices visible by changing the ID", { severity: "P0" }),
+    E("technical-qa-engineer", "done", "2 findings"),
+    E("functional-test-engineer", "found", "Save button on Settings does nothing", { severity: "P1" }),
+    E("data-integrity-analyst", "working", "Deleting a project and checking the counts"),
+    E("application-security-tester", "done", "1 finding"),
+    E("exploratory-ux-tester", "working", "Signing up as a brand new user"),
+    E("data-integrity-analyst", "found", "Deleted project still counted on dashboard", { severity: "P2" }),
+    E("api-test-engineer", "done", "1 finding"),
+    E("edge-case-test-engineer", "working", "Double-clicking 'Create project'"),
+    E("exploratory-ux-tester", "found", "Empty dashboard gives no hint what to do next", { severity: "P3" }),
+    E("functional-test-engineer", "done", "3 findings"),
+    E("edge-case-test-engineer", "found", "Double click creates two projects", { severity: "P2" }),
+    E("data-integrity-analyst", "done", "1 finding"),
+    E("visual-qa-engineer", "working", "Checking every page at 390px wide"),
+    E("exploratory-ux-tester", "done", "1 finding"),
+    E("edge-case-test-engineer", "done", "1 finding"),
+    E("accessibility-specialist", "working", "Tabbing through the settings form"),
+    E("visual-qa-engineer", "found", "Pricing table overflows on mobile", { severity: "P3" }),
+    E("accessibility-specialist", "found", "Modal can't be closed with the keyboard", { severity: "P2" }),
+    E("performance-test-engineer", "working", "Measuring homepage load (LCP)"),
+    E("visual-qa-engineer", "done", "1 finding"),
+    E("accessibility-specialist", "done", "1 finding"),
+    E("performance-test-engineer", "found", "Hero image is 4.2 MB: LCP 5.8 s", { severity: "P2" }),
+    E("performance-test-engineer", "done", "1 finding"),
+    E("qa-lead", "phase", "Reproducing P0–P2 and writing the report", { phase: "report" }),
+    E("qa-lead", "waiting", "Report ready. Which issues should I fix?"),
+    E("qa-lead", "phase", "Fixing QA-001 and QA-002", { phase: "fixing" }),
+    E("qa-lead", "phase", "Retested and regressed. Final report ready!", { phase: "final" }),
+    E("qa-lead", "done", "Release status: PASS WITH KNOWN ISSUES"),
+  ];
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+resetState();
+TEAM.forEach(buildStation);
+rebuildBadges();
+
+document.getElementById("demo").onclick = () => play(demoEvents(), "DEMO");
+document.getElementById("replay").onclick = replay;
+document.getElementById("runs").onchange = (e) => {
+  selectedRun = e.target.value; stopAll(); since = 0; resetState(); rebuildBadges(); feedDirty = true; poll();
+};
+
+(function loop() {
+  const t = performance.now();
+  renderStations(t);
+  renderFeed();
+  requestAnimationFrame(loop);
+})();
+
+const params = new URLSearchParams(location.search);
+if (params.has("demo") || location.protocol === "file:") play(demoEvents(), "DEMO");
+else { poll(); loadRuns(); }
+</script>
+</body>
+</html>

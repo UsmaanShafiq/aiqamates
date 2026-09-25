@@ -24,6 +24,7 @@ Write-Host "Installed QA agents   -> $agentDst"
 
 $py = Get-Command python -ErrorAction SilentlyContinue
 if ($py) {
+    & python (Join-Path $skillDst "scripts\setup_permissions.py")
     & python -c "import reportlab" 2>$null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Installing ReportLab for PDF reports..."

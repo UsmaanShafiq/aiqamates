@@ -21,7 +21,7 @@ Works best with:
     cd aiqamates
     bash install.sh
 
-This copies the `/qa` skill to `~/.claude/skills/qa/` and the agents to `~/.claude/agents/`, and installs ReportLab for PDFs.
+This copies the `/qa` skill to `~/.claude/skills/qa/` and the agents to `~/.claude/agents/`, installs ReportLab for PDFs, and adds a narrow permission rule to `~/.claude/settings.json` so the QA Office progress scripts (`qa_event.py`, `qa_office.py`) run without a prompt each time.
 
 To update later: `git pull` and run the installer again.
 
@@ -51,7 +51,24 @@ Your answers are saved in the project:
 | `skills/qa/SKILL.md` | The `/qa` command: forms, workflow and QA Lead rules |
 | `skills/qa/templates/qa-report-template.md` | Report structure |
 | `skills/qa/scripts/generate_qa_report.py` | Markdown → PDF converter |
+| `skills/qa/office/index.html` | The QA Office page (pixel-art team view) |
+| `skills/qa/scripts/qa_office.py`, `qa_event.py` | QA Office server and progress logger |
 | `agents/*.md` | The 10 specialist subagents (see The team) |
+
+## QA Office: watch the team work
+
+When `/qa` starts, a live **QA Office** opens in the browser pane: a pixel-art office where every agent sits at their own desk. You can see:
+
+- who is **working** (typing, green code on their screen, a speech bubble saying what they're checking)
+- who just **found a bug** (red flashing screen, a "!" and the severity)
+- when the QA Lead is **waiting for you** to answer a form ("?")
+- who is **done** (a little jump and a ✓), plus bug counts per severity, the current phase and an activity feed
+
+Open it yourself anytime from a project folder:
+
+    python ~/.claude/skills/qa/scripts/qa_office.py
+
+Then visit `http://localhost:4477`. Use **Replay** to watch a finished run again, pick older runs from the dropdown, or press **Demo** (or add `?demo=1`) to see a simulated run. Progress is stored in `qa/live/` in your project.
 
 ## The team
 
