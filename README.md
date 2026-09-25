@@ -7,6 +7,13 @@ Works best with:
 - WordPress
 - WooCommerce
 
+## Requirements
+
+- [Claude Code](https://claude.com/claude-code): the desktop app (Code tab), the CLI, or the VS Code / JetBrains extension
+- [Git](https://git-scm.com/) to download this repo
+- [Python 3](https://www.python.org/downloads/) for the QA Office and PDF reports (on Windows, tick "Add Python to PATH" when installing)
+- For browser testing: the Claude desktop app's built-in browser, or Claude in Chrome
+
 ## Install (once)
 
 **Windows (PowerShell):**
@@ -24,6 +31,14 @@ Works best with:
 This copies the `/qa` skill to `~/.claude/skills/qa/` and the agents to `~/.claude/agents/`, installs ReportLab for PDFs, and adds a narrow permission rule to `~/.claude/settings.json` so the QA Office progress scripts (`qa_event.py`, `qa_office.py`) run without a prompt each time.
 
 To update later: `git pull` and run the installer again.
+
+Then open any project in a **new** Claude Code session and type `/qa` (full QA run) or `/qa-office` (just watch the team).
+
+**Troubleshooting**
+- `/qa` doesn't appear: start a new Claude Code session; commands load when a session starts.
+- `python` not found: install Python 3 and make sure it's on your PATH, then run the installer again.
+- PowerShell says scripts are disabled: use the exact command above (`-ExecutionPolicy Bypass` only applies to that one run).
+- The installer adds narrow permission rules to `~/.claude/settings.json` so the QA Office scripts can log progress without prompting. Remove them there if you don't want them.
 
 ## Use
 
