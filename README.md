@@ -51,6 +51,7 @@ Your answers are saved in the project:
 | `skills/qa/SKILL.md` | The `/qa` command: forms, workflow and QA Lead rules |
 | `skills/qa/templates/qa-report-template.md` | Report structure |
 | `skills/qa/scripts/generate_qa_report.py` | Markdown → PDF converter |
+| `skills/qa-office/SKILL.md` | The `/qa-office` command: opens the QA Office without running QA |
 | `skills/qa/office/index.html` | The QA Office page (pixel-art team view) |
 | `skills/qa/scripts/qa_office.py`, `qa_event.py` | QA Office server and progress logger |
 | `agents/*.md` | The 10 specialist subagents (see The team) |
@@ -64,11 +65,12 @@ When `/qa` starts, a live **QA Office** opens in the browser pane: a pixel-art o
 - when the QA Lead is **waiting for you** to answer a form ("?")
 - who is **done** (a little jump and a ✓, then off to the lounge), plus bug counts per severity on the whiteboard and header, the current phase, a team roster and an activity feed
 
-Open it yourself anytime from a project folder:
+**Open it anytime** in any project by typing in Claude Code:
 
-    python ~/.claude/skills/qa/scripts/qa_office.py
+    /qa-office          # the team for this project (latest run, or on a break if none yet)
+    /qa-office demo     # a simulated run
 
-Then visit `http://localhost:4477`. Use **Replay** to watch a finished run again, pick older runs from the dropdown, or press **Demo** (or add `?demo=1`) to see a simulated run. Progress is stored in `qa/live/` in your project.
+Or without Claude, from the project folder: `python ~/.claude/skills/qa/scripts/qa_office.py`, then visit `http://localhost:4477`. Use **Replay** to watch a finished run again, pick older runs from the dropdown, or press **Demo** (or add `?demo=1`) to see a simulated run. Progress is stored in `qa/live/` in your project.
 
 ## The team
 

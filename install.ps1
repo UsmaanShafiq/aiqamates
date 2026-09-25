@@ -12,6 +12,9 @@ New-Item -ItemType Directory -Force $skillDst | Out-Null
 New-Item -ItemType Directory -Force $agentDst | Out-Null
 
 Copy-Item -Recurse -Force (Join-Path $repo "skills\qa\*") $skillDst
+$officeDst = Join-Path $claude "skills\qa-office"
+New-Item -ItemType Directory -Force $officeDst | Out-Null
+Copy-Item -Recurse -Force (Join-Path $repo "skills\qa-office\*") $officeDst
 # Remove agents installed under the old v1 names
 foreach ($old in "qa-functional","qa-ux-exploratory","qa-technical","qa-adversarial","qa-api","qa-security","qa-data-auth","qa-accessibility","qa-responsive-visual","qa-performance") {
     $f = Join-Path $agentDst "$old.md"
@@ -20,6 +23,7 @@ foreach ($old in "qa-functional","qa-ux-exploratory","qa-technical","qa-adversar
 Copy-Item -Force (Join-Path $repo "agents\*.md") $agentDst
 
 Write-Host "Installed /qa skill   -> $skillDst"
+Write-Host "Installed /qa-office -> $officeDst"
 Write-Host "Installed QA agents   -> $agentDst"
 
 $py = Get-Command python -ErrorAction SilentlyContinue
@@ -36,3 +40,4 @@ if ($py) {
 
 Write-Host ""
 Write-Host "Done. Open any project in a NEW Claude Code session and type:  /qa"
+Write-Host "To just watch the team: /qa-office   (or /qa-office demo)"
