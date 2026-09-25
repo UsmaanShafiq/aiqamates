@@ -9,11 +9,9 @@
 <style>
   :root {
     --bg: #1b1a2e;
-    --floor-a: #2a2842;
-    --floor-b: #25233b;
-    --wall: #33305a;
     --panel: #14132a;
     --panel-edge: #4b4680;
+    --wall: #33305a;
     --text: #efeaff;
     --muted: #a39fc7;
     --accent: #ffd166;
@@ -28,14 +26,10 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "VT323", ui-monospace, monospace;
-    font-size: 20px;
-    line-height: 1.15;
-    min-height: 100vh;
+    background: var(--bg); color: var(--text);
+    font-family: "VT323", ui-monospace, monospace; font-size: 20px; line-height: 1.15; min-height: 100vh;
   }
-  h1, .pixel { font-family: "Press Start 2P", ui-monospace, monospace; }
+  h1 { font-family: "Press Start 2P", ui-monospace, monospace; }
 
   /* ---------- header ---------- */
   header {
@@ -67,82 +61,61 @@
   .phase.now { color: var(--bubble-text); background: var(--accent); border-bottom-color: #c99a2e; }
 
   /* ---------- layout ---------- */
-  main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  .stage { min-width: 0; padding: 16px; }
 
-  .office {
-    padding: 22px 16px 28px;
-    background-color: var(--floor-a);
-    background-image:
-      linear-gradient(45deg, var(--floor-b) 25%, transparent 25%, transparent 75%, var(--floor-b) 75%),
-      linear-gradient(45deg, var(--floor-b) 25%, transparent 25%, transparent 75%, var(--floor-b) 75%);
-    background-size: 48px 48px; background-position: 0 0, 24px 24px;
-    min-width: 0;
+  /* ---------- the office scene ---------- */
+  .office-scroll { overflow-x: auto; border: 4px solid #0c0b1d; box-shadow: 6px 6px 0 #0c0b1d; }
+  .office { position: relative; min-width: 640px; }
+  .office canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
+  .label, .bubble { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; }
+  .label {
+    font-size: 15px; line-height: 1; padding: 1px 4px 2px; background: rgba(12, 11, 29, 0.78); color: #fff; white-space: nowrap;
   }
-  .lead-row { display: flex; justify-content: center; margin-bottom: 18px; }
-  .desks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 26px 16px; }
+  .label.working { color: var(--ok); } .label.found { color: #ff9aac; } .label.waiting { color: var(--accent); }
+  .bubble {
+    width: max-content; max-width: 150px; background: var(--bubble); color: var(--bubble-text);
+    border: 2px solid #0c0b1d; padding: 2px 6px 3px; font-size: 16px; line-height: 1;
+    box-shadow: 2px 2px 0 #0c0b1d; opacity: 0; transition: opacity 0.25s;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .bubble.show { opacity: 1; }
+  .bubble.chat { background: #e9f6ff; border-radius: 8px; }
+  .bubble.alert { background: #ffe1e6; }
 
-  .station { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 58px; }
-  .station canvas { image-rendering: pixelated; image-rendering: crisp-edges; width: 160px; height: 140px; display: block; }
-  .station.lead canvas { width: 200px; height: 175px; }
-  .plate {
-    margin-top: 6px; text-align: center; background: var(--panel); border: 2px solid var(--panel-edge);
-    padding: 4px 8px 5px; width: 100%; max-width: 210px;
-  }
-  .plate .title { font-size: 18px; color: var(--text); }
-  .plate .status { font-size: 16px; color: var(--muted); display: flex; justify-content: center; align-items: center; gap: 6px; }
+  /* ---------- team roster ---------- */
+  .team { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 16px; }
+  .card { background: var(--panel); border: 2px solid var(--panel-edge); padding: 6px 9px; display: grid; grid-template-columns: 1fr auto; gap: 0 8px; }
+  .card .name { font-size: 20px; color: var(--accent); }
+  .card .role { grid-column: 1 / -1; font-size: 16px; color: var(--muted); }
+  .card .status { font-size: 16px; display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
+  .card .findings { grid-column: 1 / -1; display: flex; gap: 3px; flex-wrap: wrap; min-height: 10px; margin-top: 3px; }
+  .card .findings i { width: 10px; height: 10px; display: inline-block; }
   .dot { width: 8px; height: 8px; display: inline-block; background: var(--muted); }
   .st-working .dot { background: var(--ok); animation: blink 0.8s steps(2) infinite; }
   .st-found .dot { background: var(--bad); }
   .st-waiting .dot { background: var(--accent); animation: blink 1.2s steps(2) infinite; }
   .st-blocked .dot { background: var(--warn); }
   .st-done .dot { background: var(--info); }
-  .findings { display: flex; gap: 3px; justify-content: center; margin-top: 3px; min-height: 12px; flex-wrap: wrap; }
-  .findings i { width: 10px; height: 10px; display: inline-block; }
-
-  .bubble {
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: max-content; max-width: 200px; background: var(--bubble); color: var(--bubble-text);
-    border: 3px solid #0c0b1d; padding: 4px 8px; font-size: 17px; line-height: 1.05;
-    box-shadow: 3px 3px 0 #0c0b1d; opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .bubble.show { opacity: 1; }
-  .bubble.alert { background: #ffe1e6; }
-  .emote {
-    position: absolute; top: 60px; left: calc(50% - 44px); font-family: "Press Start 2P", monospace; font-size: 16px;
-    text-shadow: 2px 2px 0 #0c0b1d; opacity: 0; pointer-events: none;
-  }
-  .station.lead .emote { left: calc(50% - 56px); }
-  .emote.show { opacity: 1; animation: pop 0.6s steps(3) infinite alternate; }
-
-  @media (max-width: 480px) {
-    .desks { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 10px; }
-    .station { padding-top: 64px; }
-    .station canvas { width: 128px; height: 112px; }
-    .plate .title { font-size: 16px; }
-    .bubble { max-width: 150px; font-size: 15px; }
-    .emote { top: 64px; left: calc(50% - 40px); }
-  }
-
   @keyframes blink { 50% { opacity: 0.2; } }
-  @keyframes pop { from { transform: translateY(0); } to { transform: translateY(-5px); } }
 
   /* ---------- feed ---------- */
   aside { background: var(--panel); border-left: 4px solid var(--panel-edge); display: flex; flex-direction: column; min-height: 0; }
-  @media (max-width: 900px) { aside { border-left: 0; border-top: 4px solid var(--panel-edge); } }
+  @media (max-width: 1000px) { aside { border-left: 0; border-top: 4px solid var(--panel-edge); } }
   aside h2 { font-family: "Press Start 2P", monospace; font-size: 10px; margin: 0; padding: 14px 14px 10px; color: var(--accent); }
   .feed { list-style: none; margin: 0; padding: 0 14px 14px; overflow-y: auto; max-height: calc(100vh - 170px); }
-  @media (max-width: 900px) { .feed { max-height: 360px; } }
+  @media (max-width: 1000px) { .feed { max-height: 360px; } }
   .feed li { padding: 6px 0 7px; border-bottom: 2px dashed #2d2a55; font-size: 18px; }
   .feed .who { color: var(--accent); }
   .feed .time { color: var(--muted); font-size: 15px; float: right; }
   .feed .sev { font-family: "Press Start 2P", monospace; font-size: 8px; padding: 2px 3px; color: #0c0b1d; margin-right: 4px; }
-  .empty { color: var(--muted); padding: 10px 14px; }
+  .empty { color: var(--muted); padding: 10px 0; }
+  .hint { color: var(--muted); font-size: 16px; margin: 8px 2px 0; }
+  .swipe { display: none; }
+  @media (max-width: 700px) { .swipe { display: inline; } }
 
-  @media (prefers-reduced-motion: reduce) {
-    .dot, .emote.show { animation: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -159,9 +132,14 @@
 </header>
 <nav class="phases" id="phases" aria-label="QA phases"></nav>
 <main>
-  <section class="office" aria-label="The QA team at work">
-    <div class="lead-row" id="lead-row"></div>
-    <div class="desks" id="desks"></div>
+  <section class="stage" aria-label="The QA team at work">
+    <div class="office-scroll">
+      <div class="office" id="office">
+        <canvas id="scene" width="400" height="224" role="img" aria-label="Pixel-art office where the QA team works and takes breaks"></canvas>
+      </div>
+    </div>
+    <p class="hint">Busy agents sit at their desks. Free agents take a break in the lounge and chat.<span class="swipe"> Swipe the office sideways to see the lounge.</span></p>
+    <div class="team" id="team"></div>
   </section>
   <aside aria-label="Activity feed">
     <h2>ACTIVITY</h2>
@@ -171,85 +149,124 @@
 
 <script>
 /* ============================================================
-   Team roster: look = pixel-art appearance
+   Team
    ============================================================ */
 const TEAM = [
-  { id: "qa-lead", title: "QA Lead", short: "Lead",
-    look: { skin: "#c68a5a", hair: "#2a1b12", style: "short", shirt: "#3c4a8c", acc: "tie", accColor: "#e0364f" } },
-  { id: "functional-test-engineer", title: "Functional Test Engineer", short: "Functional",
-    look: { skin: "#f1c7a0", hair: "#7a4a22", style: "short", shirt: "#2f9e6e", acc: "none" } },
-  { id: "exploratory-ux-tester", title: "Exploratory UX Tester", short: "UX",
-    look: { skin: "#e0a878", hair: "#c9432e", style: "long", shirt: "#f08bb4", acc: "beret", accColor: "#5b3f9e" } },
-  { id: "technical-qa-engineer", title: "Technical QA Engineer", short: "Technical",
-    look: { skin: "#8d5a3b", hair: "#15110e", style: "short", shirt: "#3a3f4b", acc: "headphones", accColor: "#26d0ce" } },
-  { id: "edge-case-test-engineer", title: "Edge-Case Test Engineer", short: "Edge-Case",
-    look: { skin: "#f5d0b0", hair: "#f2c230", style: "spiky", shirt: "#e8612c", acc: "none" } },
-  { id: "api-test-engineer", title: "API Test Engineer", short: "API",
-    look: { skin: "#d9a066", hair: "#3b2a20", style: "short", shirt: "#4e7fd6", acc: "glasses" } },
-  { id: "application-security-tester", title: "Application Security Tester", short: "Security",
-    look: { skin: "#b5794c", hair: "#111", style: "short", shirt: "#23252f", acc: "hood", accColor: "#23252f" } },
-  { id: "data-integrity-analyst", title: "Data Integrity & Access Control Analyst", short: "Data",
-    look: { skin: "#f0bf94", hair: "#4a2c1a", style: "bun", shirt: "#8f5bd6", acc: "glasses" } },
-  { id: "accessibility-specialist", title: "Accessibility Specialist", short: "A11y",
-    look: { skin: "#6b4228", hair: "#0f0b09", style: "long", shirt: "#f2a33a", acc: "none" } },
-  { id: "visual-qa-engineer", title: "Visual & Responsive QA Engineer", short: "Visual",
-    look: { skin: "#f3cfae", hair: "#e57fb0", style: "long", shirt: "#2bb3b1", acc: "headband", accColor: "#ffffff" } },
-  { id: "performance-test-engineer", title: "Performance Test Engineer", short: "Performance",
-    look: { skin: "#a86b45", hair: "#1c140f", style: "short", shirt: "#d9433b", acc: "headband", accColor: "#ffd166" } },
+  { id: "qa-lead", name: "Marcus", title: "QA Lead",
+    look: { skin: "#c68a5a", hair: "#2a1b12", style: "short", shirt: "#3c4a8c", pants: "#2a2d45", acc: "tie", accColor: "#e0364f" },
+    lines: ["Great work, team! 🙌", "Reproduce it twice, then report it", "Who wants coffee? My treat ☕", "No P0s on my watch!"] },
+  { id: "functional-test-engineer", name: "Ben", title: "Functional Test Engineer",
+    look: { skin: "#f1c7a0", hair: "#7a4a22", style: "short", shirt: "#2f9e6e", pants: "#3a3550", acc: "none" },
+    lines: ["The Save button didn't save 💾", "I clicked every link. Twice.", "Forms are my cardio"] },
+  { id: "exploratory-ux-tester", name: "Luna", title: "Exploratory UX Tester",
+    look: { skin: "#e0a878", hair: "#c9432e", style: "long", shirt: "#f08bb4", pants: "#3b3a6b", acc: "beret", accColor: "#5b3f9e" },
+    lines: ["A new user would be so lost here", "Empty states need love 💜", "Where does this button even go?"] },
+  { id: "technical-qa-engineer", name: "Kofi", title: "Technical QA Engineer",
+    look: { skin: "#8d5a3b", hair: "#15110e", style: "short", shirt: "#3a3f4b", pants: "#23252f", acc: "headphones", accColor: "#26d0ce" },
+    lines: ["Console is clean… for now 🎧", "Hydration errors again?!", "I dream in stack traces"] },
+  { id: "edge-case-test-engineer", name: "Jax", title: "Edge-Case Test Engineer",
+    look: { skin: "#f5d0b0", hair: "#f2c230", style: "spiky", shirt: "#e8612c", pants: "#2e3a5c", acc: "none" },
+    lines: ["I double-clicked it. Twice. 😈", "What if the name is 5,000 emojis?", "Back button mid-payment? Yes."] },
+  { id: "api-test-engineer", name: "Omar", title: "API Test Engineer",
+    look: { skin: "#d9a066", hair: "#3b2a20", style: "short", shirt: "#4e7fd6", pants: "#2c2f3f", acc: "glasses" },
+    lines: ["That should be a 404, not a 500 🙃", "JSON for breakfast", "Who needs a UI? curl is life"] },
+  { id: "application-security-tester", name: "Rin", title: "Application Security Tester",
+    look: { skin: "#b5794c", hair: "#111", style: "short", shirt: "#23252f", pants: "#1a1b22", acc: "hood", accColor: "#23252f" },
+    lines: ["I changed one ID in the URL 👀", "Never trust the client", "Is that token in localStorage?"] },
+  { id: "data-integrity-analyst", name: "Mei", title: "Data Integrity & Access Control Analyst",
+    look: { skin: "#f0bf94", hair: "#4a2c1a", style: "bun", shirt: "#8f5bd6", pants: "#35304f", acc: "glasses" },
+    lines: ["Where did that record go? 🤔", "The counts don't add up…", "Logout means logout!"] },
+  { id: "accessibility-specialist", name: "Amara", title: "Accessibility Specialist",
+    look: { skin: "#6b4228", hair: "#0f0b09", style: "long", shirt: "#f2a33a", pants: "#3a2f4f", acc: "none" },
+    lines: ["Can you close it with Esc? No? 😬", "Keyboard-only day! ⌨️", "Alt text is not optional"] },
+  { id: "visual-qa-engineer", name: "Sofia", title: "Visual & Responsive QA Engineer",
+    look: { skin: "#f3cfae", hair: "#e57fb0", style: "long", shirt: "#2bb3b1", pants: "#34406a", acc: "headband", accColor: "#ffffff" },
+    lines: ["It overflows at 390px 📱", "Pixel-perfect or bust ✨", "Who approved this padding?"] },
+  { id: "performance-test-engineer", name: "Diego", title: "Performance Test Engineer",
+    look: { skin: "#a86b45", hair: "#1c140f", style: "short", shirt: "#d9433b", pants: "#2a2a3a", acc: "headband", accColor: "#ffd166" },
+    lines: ["A 4MB hero image. Why. 🐢", "LCP under 2s, chef's kiss", "Every request counts ⏱️"] },
 ];
-const PHASES = [
-  ["discovery", "Discovery"], ["context", "Context"], ["setup", "Setup"], ["plan", "Plan"],
-  ["testing", "Testing"], ["report", "Report"], ["fixing", "Fixing"], ["final", "Final"],
+const SMALL_TALK = [
+  "Works on my machine! 🤷", "Coffee first, then bugs ☕", "Tabs or spaces?", "It's not a bug, it's a feature!",
+  "Have you tried turning it off and on?", "404: motivation not found", "Ship it! …after QA 🚢", "Friday deploy? Brave.",
+  "Undefined is not a function… again", "Did anyone test on mobile?", "Clear cache, hard refresh!", "Lunch? 🍜",
+  "My favorite color is #FF0000", "One more coffee and I'll find a P0",
 ];
+const MENTIONS = ["{o}, want a coffee?", "Nice find earlier, {o}!", "{o}, did you see that bug?", "Ha! Good one, {o} 😂", "{o} is on fire today 🔥"];
+const PHASES = [["discovery", "Discovery"], ["context", "Context"], ["setup", "Setup"], ["plan", "Plan"],
+  ["testing", "Testing"], ["report", "Report"], ["fixing", "Fixing"], ["final", "Final"]];
 const SEVS = ["P0", "P1", "P2", "P3", "P4"];
-const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const byId = Object.fromEntries(TEAM.map((m) => [m.id, m]));
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/* ============================================================
+   Office map (logical pixels, 400 x 224)
+   ============================================================ */
+const W = 400, H = 224, CORRIDOR = 280, SPEED = 58;
+const AISLES = [26, 80, 140];
+const DESKS = { "qa-lead": { x: 158, y: 44 } };
+TEAM.slice(1).forEach((m, i) => { DESKS[m.id] = { x: [12, 68, 124, 180, 236][i % 5], y: i < 5 ? 100 : 160 }; });
+for (const id in DESKS) { const d = DESKS[id]; d.seatX = d.x + 9; }
+
+const HANGOUTS = {
+  coffee: [{ x: 298, y: 54 }, { x: 314, y: 57 }, { x: 330, y: 53 }],
+  cooler: [{ x: 372, y: 58 }, { x: 390, y: 62 }],
+  sofa:   [{ x: 331, y: 108, sit: true }, { x: 348, y: 108, sit: true }, { x: 365, y: 108, sit: true }],
+  table:  [{ x: 333, y: 172 }, { x: 367, y: 172 }, { x: 342, y: 199 }, { x: 360, y: 199 }],
+  window: [{ x: 226, y: 30 }, { x: 244, y: 30 }],
+};
+const spotOwner = new Map();  // "hangout:index" -> agent id
 
 /* ============================================================
    State
    ============================================================ */
 const agents = {};
-let phase = null, totals = {}, feedItems = [];
+let phase = null, totals = {}, feedItems = [], feedDirty = true;
 
-function resetState() {
-  for (const m of TEAM) {
-    agents[m.id] = { ...m, state: "idle", msg: "", changedAt: -1e9, foundAt: -1e9, findings: [] };
-  }
+function initAgents() {
+  const spots = [];
+  for (const h in HANGOUTS) HANGOUTS[h].forEach((s, i) => spots.push({ h, i }));
+  spots.sort(() => Math.random() - 0.5);
+  spotOwner.clear();
+  TEAM.forEach((m, idx) => {
+    const sp = spots[idx % spots.length], s = HANGOUTS[sp.h][sp.i];
+    agents[m.id] = {
+      ...m, state: "idle", msg: "", findings: [], changedAt: -1e9, foundAt: -1e9,
+      x: s.x, y: s.y, path: [], activity: "hanging", spot: sp, seat: s.sit ? "sofa" : null,
+      hangUntil: performance.now() + rand(3000, 12000), facing: 0, talk: "", talkUntil: 0, walkT: 0,
+    };
+    spotOwner.set(sp.h + ":" + sp.i, m.id);
+  });
+}
+function resetWork() {
+  for (const id in agents) Object.assign(agents[id], { state: "idle", msg: "", findings: [], changedAt: -1e9, foundAt: -1e9 });
   phase = null;
   totals = Object.fromEntries(SEVS.map((s) => [s, 0]));
-  feedItems = [];
-}
-function agentFor(id) {
-  if (!agents[id]) {  // unknown agent: give it a desk anyway
-    const m = { id, title: id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), short: id,
-      look: { skin: "#d9a066", hair: "#333", style: "short", shirt: "#777", acc: "none" } };
-    TEAM.push(m);
-    agents[id] = { ...m, state: "idle", msg: "", changedAt: -1e9, foundAt: -1e9, findings: [] };
-    buildStation(m);
-  }
-  return agents[id];
+  feedItems = []; feedDirty = true;
 }
 
 function applyEvent(ev) {
   const now = performance.now();
   if (ev.state === "run") {
-    resetState();
+    resetWork();
     document.getElementById("project").textContent = ev.msg || "QA run";
-    rebuildBadges();
     addFeed(ev, `Started a QA run${ev.msg ? " on " + ev.msg : ""}`);
     return;
   }
-  const a = agentFor(ev.agent || "qa-lead");
+  const a = agents[ev.agent];
+  if (!a) { addFeed(ev, ev.msg || ev.state); return; }
   if (ev.state === "phase") {
     phase = ev.phase || phase;
+    if (a.state !== "working") a.changedAt = now;
     a.state = "working"; a.msg = ev.msg || "";
-    a.changedAt = now;
     addFeed(ev, ev.msg || `Phase: ${phase}`);
     return;
   }
   if (ev.state === "found") {
     const sev = SEVS.includes(ev.severity) ? ev.severity : "P3";
     a.findings.push(sev); totals[sev]++;
-    a.foundAt = now; a.state = "found"; a.msg = `Found ${sev}: ${ev.msg}`;
+    a.foundAt = now; a.state = "working"; a.msg = `Found ${sev}: ${ev.msg}`;
     addFeed(ev, ev.msg, sev);
     return;
   }
@@ -260,170 +277,358 @@ function applyEvent(ev) {
 }
 
 /* ============================================================
-   Pixel-art sprites (32 x 28 logical pixels)
+   Movement & behaviour
    ============================================================ */
-function R(ctx, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+const nearestAisle = (y) => AISLES.reduce((b, v) => (Math.abs(v - y) < Math.abs(b - y) ? v : b));
+function route(ax, ay, bx, by) {
+  const pts = [];
+  const aDesk = ax < CORRIDOR, bDesk = bx < CORRIDOR;
+  const ya = aDesk ? nearestAisle(ay) : ay, yb = bDesk ? nearestAisle(by) : by;
+  if (aDesk) pts.push({ x: ax, y: ya });
+  if (aDesk && bDesk && ya === yb) { pts.push({ x: bx, y: yb }); }
+  else {
+    pts.push({ x: CORRIDOR + (aDesk ? 0 : 0), y: ya });
+    pts.push({ x: CORRIDOR, y: yb });
+    pts.push({ x: bx, y: yb });
+  }
+  pts.push({ x: bx, y: by });
+  return pts;
+}
+function goTo(a, x, y, activity) {
+  a.path = route(a.x, a.y, x, y); a.activity = activity; a.seat = null;
+}
+function releaseSpot(a) {
+  if (a.spot) { spotOwner.delete(a.spot.h + ":" + a.spot.i); a.spot = null; }
+}
+function chooseHangout(a) {
+  releaseSpot(a);
+  const free = [];
+  for (const h in HANGOUTS) HANGOUTS[h].forEach((s, i) => { if (!spotOwner.has(h + ":" + i)) free.push({ h, i }); });
+  if (!free.length) { goTo(a, rand(290, 395), rand(130, 150), "wander"); return; }
+  // prefer hangouts where someone is already chatting
+  const social = free.filter((f) => [...spotOwner.keys()].some((k) => k.startsWith(f.h + ":")));
+  const sp = social.length && Math.random() < 0.75 ? pick(social) : pick(free);
+  a.spot = sp; spotOwner.set(sp.h + ":" + sp.i, a.id);
+  const s = HANGOUTS[sp.h][sp.i];
+  goTo(a, s.x, s.y, "toHangout");
+}
+function wantsDesk(a, now) {
+  if (["working", "blocked", "waiting"].includes(a.state)) return true;
+  return a.state === "done" && now - a.changedAt < 2200;  // celebrate at the desk first
+}
+
+function update(a, now, dt) {
+  const d = DESKS[a.id];
+  const patrol = a.id === "qa-lead" && a.state === "working" && phase === "testing";
+  if (patrol) {
+    if (a.activity !== "patrolling" && a.activity !== "toPatrol" || (a.activity === "patrolling" && now > a.hangUntil)) {
+      releaseSpot(a);
+      const busy = TEAM.filter((m) => m.id !== a.id && agents[m.id].activity === "atDesk");
+      if (busy.length) { const t = DESKS[pick(busy).id]; goTo(a, t.seatX + 14, nearestAisle(t.y - 20), "toPatrol"); }
+      else if (a.activity !== "toDesk" && a.activity !== "atDesk") goTo(a, d.seatX, d.y, "toDesk");
+    }
+  } else if (wantsDesk(a, now)) {
+    if (a.activity !== "toDesk" && a.activity !== "atDesk") { releaseSpot(a); goTo(a, d.seatX, d.y, "toDesk"); }
+  } else if (["toDesk", "atDesk", "toPatrol", "patrolling"].includes(a.activity)) {
+    chooseHangout(a);
+  } else if (a.activity === "hanging" && now > a.hangUntil) {
+    chooseHangout(a);
+  } else if (a.activity === "wander" && !a.path.length && now > a.hangUntil) {
+    chooseHangout(a);
+  }
+
+  // walk
+  if (a.path.length) {
+    const p = a.path[0], dx = p.x - a.x, dy = p.y - a.y, dist = Math.hypot(dx, dy), step = SPEED * dt;
+    if (dist <= step) { a.x = p.x; a.y = p.y; a.path.shift(); } else { a.x += (dx / dist) * step; a.y += (dy / dist) * step; }
+    a.facing = Math.abs(dx) > 0.5 ? Math.sign(dx) : 0;
+    a.walkT += dt;
+    if (!a.path.length) arrive(a, now);
+  }
+}
+function arrive(a, now) {
+  a.facing = 0;
+  if (a.activity === "toDesk") { a.activity = "atDesk"; a.seat = "desk"; }
+  else if (a.activity === "toHangout") {
+    a.activity = "hanging"; a.hangUntil = now + rand(9000, 18000);
+    a.seat = a.spot && HANGOUTS[a.spot.h][a.spot.i].sit ? "sofa" : null;
+    if (a.state === "done" && a.findings.length) say(a, `Done! ${a.findings.length} bug${a.findings.length > 1 ? "s" : ""} found 🐛`, now);
+  }
+  else if (a.activity === "toPatrol") { a.activity = "patrolling"; a.hangUntil = now + rand(3500, 6000); say(a, pick(["Looking good!", "How's it going?", "Nice, keep going 👍", "Found anything?"]), now); }
+  else if (a.activity === "wander") { a.hangUntil = now + rand(3000, 6000); }
+}
+function say(a, text, now) { a.talk = text; a.talkUntil = now + 3000; }
+
+let nextChat = 0;
+function chatter(now) {
+  if (now < nextChat) return;
+  nextChat = now + rand(1600, 3200);
+  const groups = {};
+  for (const id in agents) {
+    const a = agents[id];
+    if (a.activity === "hanging" && a.spot && now > a.talkUntil) (groups[a.spot.h] ||= []).push(a);
+  }
+  const social = Object.values(groups).filter((g) => g.length >= 1 && Object.values(agents).filter((o) => o.activity === "hanging" && o.spot && o.spot.h === g[0].spot.h).length >= 2);
+  if (!social.length) return;
+  const g = pick(social), a = pick(g);
+  const others = Object.values(agents).filter((o) => o !== a && o.spot && o.spot.h === a.spot.h && o.activity === "hanging");
+  const other = pick(others);
+  const r = Math.random();
+  let text = r < 0.4 ? pick(a.lines) : r < 0.65 ? pick(MENTIONS).replace("{o}", other.name) : pick(SMALL_TALK);
+  say(a, text, now);
+  // face each other
+  a.facing = Math.sign(other.x - a.x); other.facing = Math.sign(a.x - other.x);
+}
+
+/* ============================================================
+   Drawing
+   ============================================================ */
+const cv = document.getElementById("scene"), ctx = cv.getContext("2d");
+function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); }
 function shade(hex, amt) {
-  const n = parseInt(hex.slice(1), 16);
-  const f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 + amt))));
+  const n = parseInt(hex.slice(1), 16), f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 + amt))));
   return "#" + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map((v) => v.toString(16).padStart(2, "0")).join("");
 }
 function seedRand(seed) { let s = seed; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
 
-function drawAgent(ctx, a, t) {
-  const L = a.look, S = a.state;
-  ctx.clearRect(0, 0, 32, 28);
-  const since = t - a.changedAt;
-  const jumping = S === "done" && since < 1500;
-  const dy = jumping ? -Math.round(Math.abs(Math.sin(since / 140)) * 2) : 0;
-  const found = t - a.foundAt < 3000;
-
-  // chair
-  R(ctx, 4, 9, 16, 11, "#3b3560"); R(ctx, 4, 9, 16, 1, "#4d467a");
-
-  // body + arms
-  R(ctx, 6, 12 + dy, 12, 8, L.shirt);
-  R(ctx, 6, 12 + dy, 12, 1, shade(L.shirt, 0.15));
-  if (L.acc === "tie") { R(ctx, 11, 12 + dy, 2, 1, "#fff"); R(ctx, 11, 13 + dy, 2, 5, L.accColor); }
-  R(ctx, 10, 11 + dy, 4, 1, shade(L.skin, -0.2));
-  const typing = S === "working" || S === "found";
-  const tick = Math.floor(t / 140) % 2;
-  const lh = typing && tick === 0 ? -1 : 0, rh = typing && tick === 1 ? -1 : 0;
-  R(ctx, 4, 13 + dy, 2, 5, shade(L.shirt, -0.12)); R(ctx, 18, 13 + dy, 2, 5, shade(L.shirt, -0.12));
-  R(ctx, 5, 18 + lh, 3, 1, L.skin); R(ctx, 16, 18 + rh, 3, 1, L.skin);
-
-  // hood (behind head)
-  if (L.acc === "hood") { R(ctx, 6, 2 + dy, 12, 10, L.accColor); R(ctx, 6, 2 + dy, 12, 1, shade(L.accColor, 0.3)); }
-
-  // head
-  R(ctx, 7, 3 + dy, 10, 8, L.skin);
-  R(ctx, 7, 10 + dy, 10, 1, shade(L.skin, -0.12));
-
-  // hair
-  const H = L.hair;
-  if (L.acc !== "hood") {
-    if (L.style === "long") { R(ctx, 6, 3 + dy, 2, 10, H); R(ctx, 16, 3 + dy, 2, 10, H); }
-    R(ctx, 7, 2 + dy, 10, 2, H); R(ctx, 7, 4 + dy, 1, 2, H); R(ctx, 16, 4 + dy, 1, 2, H);
-    if (L.style === "spiky") { R(ctx, 8, 1 + dy, 1, 1, H); R(ctx, 10, 0 + dy, 1, 2, H); R(ctx, 12, 1 + dy, 1, 1, H); R(ctx, 14, 0 + dy, 1, 2, H); }
-    if (L.style === "bun") { R(ctx, 10, 0 + dy, 4, 2, H); }
-  } else {
-    R(ctx, 8, 3 + dy, 8, 1, H);
+function drawRoom(t) {
+  // floor: wooden planks (work area) and carpet (lounge)
+  R(0, 20, W, H - 20, "#6b4a35");
+  for (let y = 20; y < H; y += 6) { R(0, y, CORRIDOR + 4, 1, "#5d3f2d"); for (let x = (y / 6) % 2 ? 0 : 20; x < CORRIDOR + 4; x += 40) R(x, y, 1, 6, "#5d3f2d"); }
+  R(CORRIDOR + 4, 20, W - CORRIDOR - 4, H - 20, "#3f5a6e");
+  for (let y = 22; y < H; y += 4) for (let x = CORRIDOR + 6 + (y % 8 ? 2 : 0); x < W; x += 4) R(x, y, 1, 1, "#46637a");
+  R(308, 120, 84, 44, "#b0584a"); R(310, 122, 80, 40, "#c56b5b");  // rug
+  for (let x = 314; x < 388; x += 8) R(x, 141, 4, 2, "#e0a36a");
+  // wall
+  R(0, 0, W, 20, "#4a4478"); R(0, 18, W, 2, "#2f2a55");
+  for (const wx of [18, 62, 214]) {  // windows with a sky that slowly shifts
+    R(wx, 3, 36, 12, "#26213f");
+    R(wx + 1, 4, 34, 10, "#7ec8f0"); R(wx + 1, 11, 34, 3, "#a9dcf5");
+    const cx = wx + 4 + ((t / 400) % 40); if (cx < wx + 30) { R(cx, 6, 6, 2, "#fff"); R(cx + 2, 5, 3, 1, "#fff"); }
+    R(wx + 17, 4, 2, 10, "#26213f");
   }
+  // whiteboard with live bug chart
+  R(122, 2, 64, 15, "#26213f"); R(123, 3, 62, 13, "#f4f2ff");
+  SEVS.forEach((s, i) => { const h = Math.min(10, totals[s] * 2); R(128 + i * 11, 14 - h, 7, h, getComputedStyle(document.documentElement).getPropertyValue("--" + s.toLowerCase())); R(128 + i * 11, 14, 7, 1, "#b8b3d9"); });
+  // clock
+  R(262, 4, 10, 10, "#26213f"); R(263, 5, 8, 8, "#fff"); R(266, 6, 1, 3, "#333");
+  const hand = Math.floor(t / 1000) % 4; R([266, 267, 266, 264][hand], [8, 8, 9, 8][hand], 2, 1, "#e0364f");
+  // corridor divider plants
+  plant(283, 198); plant(392, 120); plant(4, 196);
+}
+function plant(x, y) { R(x - 3, y - 2, 7, 6, "#9c5a3c"); R(x - 5, y - 9, 11, 7, "#3fa35a"); R(x - 3, y - 12, 7, 4, "#57c26f"); R(x - 1, y - 14, 3, 3, "#3fa35a"); }
 
-  // accessories on head
-  if (L.acc === "beret") { R(ctx, 6, 1 + dy, 11, 2, L.accColor); R(ctx, 14, 0 + dy, 2, 1, L.accColor); }
-  if (L.acc === "headband") { R(ctx, 7, 4 + dy, 10, 1, L.accColor); }
-  if (L.acc === "headphones") { R(ctx, 7, 1 + dy, 10, 1, "#222"); R(ctx, 6, 1 + dy, 1, 4, "#222"); R(ctx, 17, 1 + dy, 1, 4, "#222");
-    R(ctx, 5, 5 + dy, 2, 4, L.accColor); R(ctx, 17, 5 + dy, 2, 4, L.accColor); }
-
-  // eyes (blink every few seconds, offset per agent)
-  const blink = ((t + a.id.length * 997) % 3600) < 130;
-  const eyeC = "#1b1a2e";
-  if (!blink) { R(ctx, 9, 6 + dy, 1, 2, eyeC); R(ctx, 14, 6 + dy, 1, 2, eyeC); }
-  else { R(ctx, 9, 7 + dy, 1, 1, eyeC); R(ctx, 14, 7 + dy, 1, 1, eyeC); }
-  if (L.acc === "glasses") { const g = "#1b1a2e"; R(ctx, 8, 5 + dy, 3, 1, g); R(ctx, 13, 5 + dy, 3, 1, g); R(ctx, 11, 6 + dy, 2, 1, g);
-    R(ctx, 8, 8 + dy, 3, 1, g); R(ctx, 13, 8 + dy, 3, 1, g); R(ctx, 8, 6 + dy, 1, 2, g); R(ctx, 15, 6 + dy, 1, 2, g); }
-
-  // mouth
-  const m = shade(L.skin, -0.45);
-  if (S === "done") { R(ctx, 10, 8 + dy, 1, 1, m); R(ctx, 11, 9 + dy, 2, 1, m); R(ctx, 13, 8 + dy, 1, 1, m); }
-  else if (found) { R(ctx, 11, 8 + dy, 2, 2, m); }
-  else if (S === "blocked") { R(ctx, 11, 9 + dy, 2, 1, m); R(ctx, 10, 10 + dy, 1, 1, m); R(ctx, 13, 10 + dy, 1, 1, m); }
-  else { R(ctx, 11, 9 + dy, 2, 1, m); }
-
-  // desk
-  R(ctx, 1, 19, 30, 2, "#a8693c"); R(ctx, 1, 19, 30, 1, "#c98a55");
-  R(ctx, 2, 21, 28, 7, "#7a4a28"); R(ctx, 2, 21, 28, 1, "#5d3820");
-  R(ctx, 14, 23, 5, 1, "#c98a55");
-  // keyboard
-  R(ctx, 6, 18, 12, 1, "#d6d3e8");
-
-  // monitor
-  R(ctx, 20, 8, 11, 10, "#26243a"); R(ctx, 24, 18, 3, 1, "#26243a");
-  drawScreen(ctx, a, t, found);
-
-  // mug
-  R(ctx, 2, 16, 3, 3, "#f4f1ff"); R(ctx, 5, 17, 1, 1, "#f4f1ff");
+function drawCoffee(t) {
+  R(286, 28, 50, 12, "#8a5a3c"); R(286, 28, 50, 2, "#a8744f");
+  R(292, 14, 12, 15, "#3a3a44"); R(294, 16, 8, 4, "#1c1c22"); R(296, 21, 4, 4, "#1c1c22"); R(297, 25, 2, 3, "#f4f1ff");
+  if (Math.floor(t / 500) % 2) { R(297, 19, 1, 1, "#ddd"); } else { R(298, 18, 1, 1, "#ddd"); }
+  R(312, 25, 3, 3, "#f4f1ff"); R(318, 25, 3, 3, "#ffd166"); R(326, 22, 6, 6, "#57c26f");
+}
+function drawCooler(t) {
+  R(382, 30, 12, 16, "#d6d3e8"); R(382, 30, 12, 2, "#fff"); R(384, 36, 3, 2, "#4e7fd6");
+  R(383, 16, 10, 14, "#7ec8f0"); R(384, 17, 8, 12, "#a9dcf5");
+  const b = Math.floor(t / 700) % 12; R(386, 28 - b, 1, 1, "#fff");
+}
+function drawSofaBack() { R(314, 92, 70, 10, "#5b3f9e"); R(314, 92, 70, 2, "#7454c0"); }
+function drawSofaFront() {
+  R(318, 104, 62, 5, "#6a4bb3"); R(318, 109, 62, 5, "#4a3285");
+  R(312, 96, 6, 18, "#4a3285"); R(380, 96, 6, 18, "#4a3285"); R(312, 96, 6, 2, "#6a4bb3"); R(380, 96, 6, 2, "#6a4bb3");
+}
+function drawTable() {
+  R(338, 176, 24, 3, "#8a5a3c"); R(336, 177, 28, 1, "#8a5a3c"); R(338, 174, 24, 2, "#b07a52");
+  R(348, 179, 4, 10, "#5d3820"); R(343, 188, 14, 2, "#5d3820");
+  R(342, 172, 3, 2, "#f4f1ff"); R(355, 172, 3, 2, "#ffd166");
 }
 
-function drawScreen(ctx, a, t, found) {
-  const x = 21, y = 9, w = 9, h = 8, S = a.state;
-  if (found && Math.floor(t / 250) % 2 === 0) { R(ctx, x, y, w, h, "#b3203c"); R(ctx, x + 4, y + 1, 1, 4, "#fff"); R(ctx, x + 4, y + 6, 1, 1, "#fff"); return; }
-  if (S === "working" || S === "found") {
-    R(ctx, x, y, w, h, "#0d3b2c");
+function drawScreen(a, x, y, t) {
+  const found = t - a.foundAt < 3000, S = a.state, w = 9, h = 7;
+  if (found && Math.floor(t / 250) % 2 === 0) { R(x, y, w, h, "#b3203c"); R(x + 4, y + 1, 1, 3, "#fff"); R(x + 4, y + 5, 1, 1, "#fff"); return; }
+  if (a.activity === "atDesk" && (S === "working")) {
+    R(x, y, w, h, "#0d3b2c");
     const rnd = seedRand(a.id.length * 31 + Math.floor(t / 180));
-    for (let r = 0; r < h; r++) { const len = 1 + Math.floor(rnd() * 7); R(ctx, x + 1, y + r, len, 1, r % 3 ? "#5ee6a0" : "#b7ffd9"); }
+    for (let r = 0; r < h; r++) R(x + 1, y + r, 1 + Math.floor(rnd() * 7), 1, r % 3 ? "#5ee6a0" : "#b7ffd9");
     return;
   }
-  if (S === "done") { R(ctx, x, y, w, h, "#18407a"); const c = "#8fd0ff";
-    R(ctx, x + 2, y + 4, 1, 1, c); R(ctx, x + 3, y + 5, 1, 1, c); R(ctx, x + 4, y + 4, 1, 1, c); R(ctx, x + 5, y + 3, 1, 1, c); R(ctx, x + 6, y + 2, 1, 1, c); return; }
-  if (S === "waiting") { R(ctx, x, y, w, h, "#4a3b0c"); const on = Math.floor(t / 400) % 2; if (on) { R(ctx, x + 3, y + 2, 3, 1, "#ffd166"); R(ctx, x + 5, y + 3, 1, 1, "#ffd166"); R(ctx, x + 4, y + 4, 1, 1, "#ffd166"); R(ctx, x + 4, y + 6, 1, 1, "#ffd166"); } return; }
-  if (S === "blocked") { R(ctx, x, y, w, h, "#5a2d0c"); R(ctx, x + 2, y + 3, 5, 2, "#ffb057"); return; }
-  R(ctx, x, y, w, h, "#161528"); R(ctx, x + 1, y + 1, 2, 1, "#2b2950");
+  if (S === "done") { R(x, y, w, h, "#18407a"); const c = "#8fd0ff"; R(x + 2, y + 3, 1, 1, c); R(x + 3, y + 4, 1, 1, c); R(x + 4, y + 3, 1, 1, c); R(x + 5, y + 2, 1, 1, c); R(x + 6, y + 1, 1, 1, c); return; }
+  if (S === "waiting") { R(x, y, w, h, "#4a3b0c"); if (Math.floor(t / 400) % 2) { R(x + 3, y + 1, 3, 1, "#ffd166"); R(x + 5, y + 2, 1, 1, "#ffd166"); R(x + 4, y + 3, 1, 1, "#ffd166"); R(x + 4, y + 5, 1, 1, "#ffd166"); } return; }
+  if (S === "blocked") { R(x, y, w, h, "#5a2d0c"); R(x + 2, y + 3, 5, 2, "#ffb057"); return; }
+  R(x, y, w, h, "#161528"); R(x + 1, y + 1, 2, 1, "#2b2950");
+}
+
+// Head + torso of a character. (cx, top) = centre x and top of the head row.
+function drawUpper(a, cx, top, t, typing) {
+  const L = a.look, ox = cx - 12, oy = top - 3, f = a.facing || 0;
+  const found = t - a.foundAt < 3000;
+  if (L.acc === "hood") { R(ox + 6, oy + 2, 12, 10, L.accColor); R(ox + 6, oy + 2, 12, 1, shade(L.accColor, 0.3)); }
+  // torso
+  R(ox + 7, oy + 11, 10, 8, L.shirt); R(ox + 7, oy + 11, 10, 1, shade(L.shirt, 0.15));
+  if (L.acc === "tie") { R(ox + 11, oy + 11, 2, 1, "#fff"); R(ox + 11, oy + 12, 2, 5, L.accColor); }
+  // head
+  R(ox + 7, oy + 3, 10, 8, L.skin); R(ox + 7, oy + 10, 10, 1, shade(L.skin, -0.12));
+  const Hc = L.hair;
+  if (L.acc !== "hood") {
+    if (L.style === "long") { R(ox + 6, oy + 3, 2, 10, Hc); R(ox + 16, oy + 3, 2, 10, Hc); }
+    R(ox + 7, oy + 2, 10, 2, Hc); R(ox + 7, oy + 4, 1, 2, Hc); R(ox + 16, oy + 4, 1, 2, Hc);
+    if (L.style === "spiky") { R(ox + 8, oy + 1, 1, 1, Hc); R(ox + 10, oy, 1, 2, Hc); R(ox + 12, oy + 1, 1, 1, Hc); R(ox + 14, oy, 1, 2, Hc); }
+    if (L.style === "bun") R(ox + 10, oy, 4, 2, Hc);
+  } else R(ox + 8, oy + 3, 8, 1, Hc);
+  if (L.acc === "beret") { R(ox + 6, oy + 1, 11, 2, L.accColor); R(ox + 14, oy, 2, 1, L.accColor); }
+  if (L.acc === "headband") R(ox + 7, oy + 4, 10, 1, L.accColor);
+  if (L.acc === "headphones") { R(ox + 7, oy + 1, 10, 1, "#222"); R(ox + 6, oy + 1, 1, 4, "#222"); R(ox + 17, oy + 1, 1, 4, "#222"); R(ox + 5, oy + 5, 2, 4, L.accColor); R(ox + 17, oy + 5, 2, 4, L.accColor); }
+  // eyes look in the walking/talking direction
+  const blink = ((t + a.id.length * 997) % 3600) < 130, eye = "#1b1a2e";
+  if (!blink) { R(ox + 9 + f, oy + 6, 1, 2, eye); R(ox + 14 + f, oy + 6, 1, 2, eye); } else { R(ox + 9 + f, oy + 7, 1, 1, eye); R(ox + 14 + f, oy + 7, 1, 1, eye); }
+  if (L.acc === "glasses") { const g = "#1b1a2e"; R(ox + 8, oy + 5, 3, 1, g); R(ox + 13, oy + 5, 3, 1, g); R(ox + 11, oy + 6, 2, 1, g); R(ox + 8, oy + 8, 3, 1, g); R(ox + 13, oy + 8, 3, 1, g); R(ox + 8, oy + 6, 1, 2, g); R(ox + 15, oy + 6, 1, 2, g); }
+  const m = shade(L.skin, -0.45), talking = t < a.talkUntil && Math.floor(t / 160) % 2;
+  if (a.state === "done" || (talking === 0 && t < a.talkUntil)) { R(ox + 10, oy + 8, 1, 1, m); R(ox + 11, oy + 9, 2, 1, m); R(ox + 13, oy + 8, 1, 1, m); }
+  else if (found || talking) R(ox + 11, oy + 8, 2, 2, m);
+  else if (a.state === "blocked") { R(ox + 11, oy + 9, 2, 1, m); R(ox + 10, oy + 10, 1, 1, m); R(ox + 13, oy + 10, 1, 1, m); }
+  else R(ox + 11, oy + 9, 2, 1, m);
+  // arms
+  const arm = shade(L.shirt, -0.12);
+  if (typing) {
+    const tick = Math.floor(t / 140) % 2;
+    R(ox + 5, oy + 12, 2, 5, arm); R(ox + 17, oy + 12, 2, 5, arm);
+    R(ox + 6, oy + 17 - (tick ? 1 : 0), 3, 1, L.skin); R(ox + 15, oy + 17 - (tick ? 0 : 1), 3, 1, L.skin);
+  } else { R(ox + 5, oy + 12, 2, 6, arm); R(ox + 17, oy + 12, 2, 6, arm); R(ox + 5, oy + 18, 2, 1, L.skin); R(ox + 17, oy + 18, 2, 1, L.skin); }
+}
+
+function drawStanding(a, t) {
+  const walking = a.path.length > 0, L = a.look;
+  const cx = Math.round(a.x), fy = Math.round(a.y);
+  const bounce = walking && Math.floor(a.walkT * 8) % 2 ? -1 : 0;
+  const jump = a.state === "done" && t - a.changedAt < 1500 ? -Math.round(Math.abs(Math.sin((t - a.changedAt) / 140)) * 2) : 0;
+  const top = fy - 19 + bounce + jump;
+  // shadow
+  ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(cx - 5, fy - 1, 10, 2);
+  // legs
+  const step = walking ? Math.floor(a.walkT * 8) % 2 : -1;
+  const P = L.pants;
+  R(cx - 4, top + 16, 3, step === 0 ? 3 : 4, P); R(cx + 1, top + 16, 3, step === 1 ? 3 : 4, P);
+  R(cx - 4, top + (step === 0 ? 19 : 20), 3, 1, "#1b1a2e"); R(cx + 1, top + (step === 1 ? 19 : 20), 3, 1, "#1b1a2e");
+  drawUpper(a, cx, top, t, false);
+}
+function drawSeated(a, cx, surfaceY, t, typing) {
+  const jump = a.state === "done" && t - a.changedAt < 1500 ? -Math.round(Math.abs(Math.sin((t - a.changedAt) / 140)) * 2) : 0;
+  const hop = t - a.foundAt < 600 ? -1 : 0;
+  drawUpper(a, cx, surfaceY - 16 + jump + hop, t, typing);
+}
+
+function drawDesk(id, t) {
+  const d = DESKS[id], a = agents[id], x = d.x, y = d.y;
+  R(x + 2, y - 13, 15, 12, "#3b3560"); R(x + 2, y - 13, 15, 1, "#4d467a");  // chair
+  if (a.activity === "atDesk") drawSeated(a, d.seatX, y, t, a.state === "working");
+  R(x, y, 30, 2, "#a8693c"); R(x, y, 30, 1, "#c98a55");                    // desk top
+  R(x + 1, y + 2, 28, 9, "#7a4a28"); R(x + 1, y + 2, 28, 1, "#5d3820"); R(x + 12, y + 5, 6, 1, "#c98a55");
+  R(x + 3, y - 1, 12, 1, "#d6d3e8");                                          // keyboard
+  R(x + 18, y - 11, 11, 10, "#26243a"); R(x + 22, y - 1, 3, 1, "#26243a");    // monitor
+  drawScreen(a, x + 19, y - 10, t);
+  R(x + 1, y - 3, 2, 3, "#f4f1ff");                                           // mug
+  // name tag on the desk front
+  R(x + 8, y + 7, 14, 3, "#e8dcc0");
+}
+
+const GLYPHS = {
+  "!": ["1", "1", "1", "0", "1"], "?": ["111", "001", "010", "000", "010"],
+  "v": ["00001", "00010", "10100", "01000"], ".": ["000000", "000000", "101010"],
+};
+function emote(a, cx, headTop, t) {
+  const found = t - a.foundAt < 3000;
+  let g = null, c = null;
+  if (found) { g = "!"; c = "#ff3b5c"; }
+  else if (a.state === "waiting") { g = "?"; c = "#e0a800"; }
+  else if (a.state === "done" && t - a.changedAt < 4000) { g = "v"; c = "#2fbf71"; }
+  else if (a.state === "blocked") { g = "."; c = "#e07b00"; }
+  if (!g) return;
+  const rows = GLYPHS[g], w = rows[0].length, h = rows.length;
+  const bx = cx - Math.ceil(w / 2) - 1 + 9, by = headTop - h - 4 + (Math.floor(t / 300) % 2 ? -1 : 0);
+  R(bx - 1, by - 1, w + 2, h + 2, "#fff");
+  rows.forEach((r, j) => [...r].forEach((v, i) => { if (v === "1") R(bx + i, by + j, 1, 1, c); }));
+}
+
+function render(t) {
+  ctx.clearRect(0, 0, W, H);
+  drawRoom(t);
+  const items = [];
+  for (const id in DESKS) items.push({ y: DESKS[id].y + 11, draw: () => drawDesk(id, t) });
+  items.push({ y: 40, draw: () => drawCoffee(t) }, { y: 46, draw: () => drawCooler(t) }, { y: 189, draw: drawTable });
+  items.push({ y: 114, draw: () => {
+    drawSofaBack();
+    for (const id in agents) { const a = agents[id]; if (a.seat === "sofa" && !a.path.length) drawSeated(a, a.x, 104, t, false); }
+    drawSofaFront();
+  } });
+  for (const id in agents) { const a = agents[id]; if (a.activity !== "atDesk" && !(a.seat === "sofa" && !a.path.length)) items.push({ y: a.y, draw: () => drawStanding(a, t) }); }
+  items.sort((p, q) => p.y - q.y).forEach((it) => it.draw());
+  for (const id in agents) { const a = agents[id]; emote(a, ...anchor(a, t), t); }
+}
+function anchor(a, t) {  // [centre x, head top] of each character, for emotes and overlays
+  if (a.activity === "atDesk") return [DESKS[a.id].seatX, DESKS[a.id].y - 16];
+  if (a.seat === "sofa" && !a.path.length) return [a.x, 104 - 16];
+  return [a.x, a.y - 19];
 }
 
 /* ============================================================
-   DOM
+   Overlays: name labels + speech bubbles
    ============================================================ */
-const stations = {};
-function buildStation(m) {
-  const el = document.createElement("div");
-  el.className = "station" + (m.id === "qa-lead" ? " lead" : "");
-  el.innerHTML = `
-    <div class="bubble" aria-live="polite"></div>
-    <div class="emote" aria-hidden="true"></div>
-    <canvas width="32" height="28" role="img" aria-label="${m.title}"></canvas>
-    <div class="plate"><div class="title">${m.title}</div>
-      <div class="status"><span class="dot"></span><span class="label">Idle</span></div>
-      <div class="findings"></div></div>`;
-  (m.id === "qa-lead" ? document.getElementById("lead-row") : document.getElementById("desks")).appendChild(el);
-  const ctx = el.querySelector("canvas").getContext("2d");
-  stations[m.id] = { el, ctx, bubble: el.querySelector(".bubble"), emote: el.querySelector(".emote"),
-    label: el.querySelector(".label"), findings: el.querySelector(".findings"), lastMsg: null, lastState: null, lastCount: -1 };
-}
-const STATE_LABEL = { idle: "Idle", working: "Working", found: "Found a bug!", waiting: "Waiting for you", blocked: "Blocked", done: "Done" };
-
-function renderStations(t) {
+const office = document.getElementById("office");
+const overlays = {};
+TEAM.forEach((m) => {
+  const label = document.createElement("div"); label.className = "label"; label.textContent = m.name;
+  const bubble = document.createElement("div"); bubble.className = "bubble"; bubble.setAttribute("aria-live", "polite");
+  office.append(label, bubble);
+  overlays[m.id] = { label, bubble, lastText: null };
+});
+function renderOverlays(t) {
+  const s = office.clientWidth / W;
   for (const id in agents) {
-    const a = agents[id], s = stations[id];
-    if (!s) continue;
-    drawAgent(s.ctx, a, t);
+    const a = agents[id], o = overlays[id], [cx, top] = anchor(a, t);
     const found = t - a.foundAt < 3000;
-    const shownState = found ? "found" : (a.state === "found" ? "working" : a.state);
-    if (s.lastState !== shownState) {
-      s.el.className = s.el.className.replace(/\bst-\S+/g, "").trim() + " st-" + shownState;
-      s.label.textContent = STATE_LABEL[shownState] || shownState;
-      s.lastState = shownState;
-    }
-    if (s.lastMsg !== a.msg) { s.bubble.textContent = a.msg; s.lastMsg = a.msg; }
-    s.bubble.classList.toggle("show", !!a.msg && a.state !== "idle");
-    s.bubble.classList.toggle("alert", found);
-    const emo = found ? ["!", css("--bad")] : a.state === "waiting" ? ["?", css("--accent")]
-      : a.state === "done" && t - a.changedAt < 4000 ? ["✓", css("--ok")] : a.state === "blocked" ? ["…", css("--warn")] : null;
-    s.emote.classList.toggle("show", !!emo);
-    if (emo) { s.emote.textContent = emo[0]; s.emote.style.color = emo[1]; }
-    if (s.lastCount !== a.findings.length) {
-      s.findings.innerHTML = a.findings.map((v) => `<i title="${v}" style="background:var(--${v.toLowerCase()})"></i>`).join("");
-      s.lastCount = a.findings.length;
-    }
+    o.label.style.transform = `translate(${cx * s}px, ${(top - 3) * s}px) translate(-50%, -100%)`;
+    o.label.className = "label " + (found ? "found" : a.activity === "atDesk" ? a.state : "");
+    const chatting = t < a.talkUntil;
+    const workMsg = a.activity === "atDesk" && a.msg && (a.state === "working" || a.state === "waiting" || a.state === "blocked");
+    const text = chatting ? a.talk : workMsg ? a.msg : "";
+    if (o.lastText !== text) { if (text) o.bubble.textContent = text; o.lastText = text; }
+    o.bubble.classList.toggle("show", !!text);
+    o.bubble.classList.toggle("chat", chatting);
+    o.bubble.classList.toggle("alert", !chatting && found);
+    o.bubble.style.transform = `translate(${cx * s}px, ${(top - 3) * s - 20}px) translate(-50%, -100%)`;
   }
 }
 
+/* ============================================================
+   Roster, counters, feed
+   ============================================================ */
+const STATE_LABEL = { idle: "On a break", working: "Working", found: "Found a bug!", waiting: "Waiting for you", blocked: "Blocked", done: "Done" };
+const teamEl = document.getElementById("team"), cards = {};
+TEAM.forEach((m) => {
+  const c = document.createElement("div"); c.className = "card";
+  c.innerHTML = `<span class="name">${m.name}</span><span class="status"><span class="dot"></span><span class="st"></span></span><span class="role">${m.title}</span><span class="findings"></span>`;
+  teamEl.appendChild(c); cards[m.id] = { el: c, st: c.querySelector(".st"), fi: c.querySelector(".findings"), key: "" };
+});
+function renderCards(t) {
+  for (const id in agents) {
+    const a = agents[id], c = cards[id];
+    const shown = t - a.foundAt < 3000 ? "found" : a.state;
+    const key = shown + a.findings.length;
+    if (c.key === key) continue;
+    c.key = key; c.el.className = "card st-" + shown; c.st.textContent = STATE_LABEL[shown] || shown;
+    c.fi.innerHTML = a.findings.map((v) => `<i title="${v}" style="background:var(--${v.toLowerCase()})"></i>`).join("");
+  }
+}
 function rebuildBadges() {
   document.getElementById("counts").innerHTML = SEVS.map((s) =>
     `<span class="count" style="border-color:var(--${s.toLowerCase()});color:var(--${s.toLowerCase()})">${s}<b>${totals[s]}</b></span>`).join("");
   const idx = PHASES.findIndex((p) => p[0] === phase);
-  document.getElementById("phases").innerHTML = PHASES.map(([k, label], i) =>
+  document.getElementById("phases").innerHTML = PHASES.map(([, label], i) =>
     `<div class="phase ${i < idx ? "done" : i === idx ? "now" : ""}">${label}</div>`).join("");
 }
-
 function addFeed(ev, text, sev) {
-  const a = agents[ev.agent] || agents["qa-lead"];
-  feedItems.unshift({ who: a ? a.short : ev.agent, text, sev, time: (ev.t || "").slice(11, 16) });
+  const m = byId[ev.agent];
+  feedItems.unshift({ who: m ? m.name : ev.agent, text, sev, time: (ev.t || "").slice(11, 16) });
   if (feedItems.length > 200) feedItems.length = 200;
   feedDirty = true;
 }
-let feedDirty = true;
 function renderFeed() {
   if (!feedDirty) return;
   feedDirty = false;
@@ -438,55 +643,45 @@ function renderFeed() {
    Data sources: live polling, replay, demo
    ============================================================ */
 let mode = "off", since = 0, pollTimer = null, playTimer = null, selectedRun = "";
-function setMode(m, label) {
-  mode = m;
-  const el = document.getElementById("mode");
-  el.className = "mode " + m; el.textContent = label;
-}
+function setMode(m, label) { mode = m; const el = document.getElementById("mode"); el.className = "mode " + m; el.textContent = label; }
 function stopAll() { clearTimeout(pollTimer); clearTimeout(playTimer); }
-function loadAll(events) { resetState(); events.forEach(applyEvent); rebuildBadges(); feedDirty = true; }
 
 async function poll() {
   try {
     const r = await fetch(`events?since=${since}${selectedRun ? "&run=" + encodeURIComponent(selectedRun) : ""}`, { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
     const data = await r.json();
-    if (data.total < since) { since = 0; resetState(); }  // new run replaced the file
+    if (data.total < since) { since = 0; resetWork(); }
     if (since === 0 && !data.events.length) document.getElementById("project").textContent = `${data.project}: waiting for /qa…`;
     data.events.forEach(applyEvent);
     if (data.events.length) rebuildBadges();
     since = data.total;
     if (mode !== "live") setMode("live", selectedRun ? "SAVED RUN" : "LIVE");
     if (!selectedRun) pollTimer = setTimeout(poll, 1000);
-    return true;
   } catch {
     if (mode === "live" || mode === "off") setMode("off", "OFFLINE");
     pollTimer = setTimeout(poll, 3000);
-    return false;
   }
 }
-
 async function loadRuns() {
   try {
     const runs = await (await fetch("runs", { cache: "no-store" })).json();
-    const sel = document.getElementById("runs");
-    sel.innerHTML = `<option value="">Current run</option>` + runs.map((r) => `<option value="${r}">${r.replace(".jsonl", "").replace("_", " ")}</option>`).join("");
+    document.getElementById("runs").innerHTML = `<option value="">Current run</option>` +
+      runs.map((r) => `<option value="${r}">${r.replace(".jsonl", "").replace("_", " ")}</option>`).join("");
   } catch {}
 }
-
 function play(events, label) {
-  stopAll(); resetState(); rebuildBadges(); setMode(label === "DEMO" ? "demo" : "replay", label);
+  stopAll(); resetWork(); rebuildBadges(); setMode(label === "DEMO" ? "demo" : "replay", label);
   let i = 0;
   const step = () => {
-    if (i >= events.length) { if (label === "DEMO") setMode("demo", "DEMO DONE"); else setMode("replay", "REPLAY DONE"); return; }
+    if (i >= events.length) { setMode(label === "DEMO" ? "demo" : "replay", label + " DONE"); return; }
     const d = new Date();
     applyEvent({ ...events[i], t: events[i].t || d.toISOString().slice(0, 11) + d.toTimeString().slice(0, 8) });
     rebuildBadges(); i++;
-    playTimer = setTimeout(step, events[i - 1].state === "found" ? 1400 : 900);
+    playTimer = setTimeout(step, events[i - 1].state === "found" ? 2200 : 1600);
   };
   step();
 }
-
 async function replay() {
   try {
     const r = await fetch(`events?since=0${selectedRun ? "&run=" + encodeURIComponent(selectedRun) : ""}`, { cache: "no-store" });
@@ -494,51 +689,50 @@ async function replay() {
     if (data.events.length) play(data.events, "REPLAY"); else alert("Nothing to replay yet.");
   } catch { alert("Replay needs the QA Office server (python qa_office.py)."); }
 }
-
 function demoEvents() {
   const E = (agent, state, msg, extra = {}) => ({ agent, state, msg, ...extra });
   return [
     E("qa-lead", "run", "demo-saas-app"),
     E("qa-lead", "phase", "Reading README, schema and recent changes", { phase: "discovery" }),
-    E("qa-lead", "phase", "Here's what I think this app does. Is it right?", { phase: "context" }),
+    E("qa-lead", "phase", "Here's what I think this app does", { phase: "context" }),
     E("qa-lead", "waiting", "Waiting for your answers in the form"),
-    E("qa-lead", "phase", "Got it! Setting up the target and scope", { phase: "setup" }),
+    E("qa-lead", "phase", "Got it! Setting up target and scope", { phase: "setup" }),
     E("qa-lead", "phase", "Writing the test plan: 42 scenarios", { phase: "plan" }),
     E("qa-lead", "phase", "Team, let's go! Testing starts now", { phase: "testing" }),
-    E("technical-qa-engineer", "working", "Watching the console on the dashboard"),
-    E("application-security-tester", "working", "Reviewing route protection in middleware.ts"),
+    E("technical-qa-engineer", "working", "Watching the console on /dashboard"),
+    E("application-security-tester", "working", "Reviewing route protection"),
     E("api-test-engineer", "working", "Mapping 14 API routes"),
     E("technical-qa-engineer", "found", "Hydration mismatch on /dashboard", { severity: "P2" }),
     E("functional-test-engineer", "working", "Testing sign up with a new email"),
-    E("api-test-engineer", "found", "GET /api/projects/999 returns 500, not 404", { severity: "P3" }),
+    E("api-test-engineer", "found", "/api/projects/999 returns 500, not 404", { severity: "P3" }),
     E("application-security-tester", "found", "Other users' invoices visible by changing the ID", { severity: "P0" }),
     E("technical-qa-engineer", "done", "2 findings"),
     E("functional-test-engineer", "found", "Save button on Settings does nothing", { severity: "P1" }),
-    E("data-integrity-analyst", "working", "Deleting a project and checking the counts"),
+    E("data-integrity-analyst", "working", "Deleting a project, checking counts"),
     E("application-security-tester", "done", "1 finding"),
     E("exploratory-ux-tester", "working", "Signing up as a brand new user"),
-    E("data-integrity-analyst", "found", "Deleted project still counted on dashboard", { severity: "P2" }),
+    E("data-integrity-analyst", "found", "Deleted project still counted", { severity: "P2" }),
     E("api-test-engineer", "done", "1 finding"),
     E("edge-case-test-engineer", "working", "Double-clicking 'Create project'"),
-    E("exploratory-ux-tester", "found", "Empty dashboard gives no hint what to do next", { severity: "P3" }),
+    E("exploratory-ux-tester", "found", "Empty dashboard gives no next step", { severity: "P3" }),
     E("functional-test-engineer", "done", "3 findings"),
     E("edge-case-test-engineer", "found", "Double click creates two projects", { severity: "P2" }),
     E("data-integrity-analyst", "done", "1 finding"),
-    E("visual-qa-engineer", "working", "Checking every page at 390px wide"),
+    E("visual-qa-engineer", "working", "Checking every page at 390px"),
     E("exploratory-ux-tester", "done", "1 finding"),
     E("edge-case-test-engineer", "done", "1 finding"),
     E("accessibility-specialist", "working", "Tabbing through the settings form"),
     E("visual-qa-engineer", "found", "Pricing table overflows on mobile", { severity: "P3" }),
-    E("accessibility-specialist", "found", "Modal can't be closed with the keyboard", { severity: "P2" }),
+    E("accessibility-specialist", "found", "Modal can't be closed with keyboard", { severity: "P2" }),
     E("performance-test-engineer", "working", "Measuring homepage load (LCP)"),
     E("visual-qa-engineer", "done", "1 finding"),
     E("accessibility-specialist", "done", "1 finding"),
     E("performance-test-engineer", "found", "Hero image is 4.2 MB: LCP 5.8 s", { severity: "P2" }),
     E("performance-test-engineer", "done", "1 finding"),
-    E("qa-lead", "phase", "Reproducing P0–P2 and writing the report", { phase: "report" }),
+    E("qa-lead", "phase", "Reproducing P0–P2, writing the report", { phase: "report" }),
     E("qa-lead", "waiting", "Report ready. Which issues should I fix?"),
     E("qa-lead", "phase", "Fixing QA-001 and QA-002", { phase: "fixing" }),
-    E("qa-lead", "phase", "Retested and regressed. Final report ready!", { phase: "final" }),
+    E("qa-lead", "phase", "Retested and regressed. Final report!", { phase: "final" }),
     E("qa-lead", "done", "Release status: PASS WITH KNOWN ISSUES"),
   ];
 }
@@ -546,20 +740,19 @@ function demoEvents() {
 /* ============================================================
    Boot
    ============================================================ */
-resetState();
-TEAM.forEach(buildStation);
-rebuildBadges();
-
+initAgents(); resetWork(); rebuildBadges();
 document.getElementById("demo").onclick = () => play(demoEvents(), "DEMO");
 document.getElementById("replay").onclick = replay;
-document.getElementById("runs").onchange = (e) => {
-  selectedRun = e.target.value; stopAll(); since = 0; resetState(); rebuildBadges(); feedDirty = true; poll();
-};
+document.getElementById("runs").onchange = (e) => { selectedRun = e.target.value; stopAll(); since = 0; resetWork(); rebuildBadges(); poll(); };
 
-(function loop() {
-  const t = performance.now();
-  renderStations(t);
-  renderFeed();
+let last = performance.now();
+(function loop(t) {
+  t = t || performance.now();
+  // Catch up in small steps if the browser throttled frames (e.g. background tab)
+  let dt = Math.min(5, (t - last) / 1000); last = t;
+  while (dt > 0) { const s = Math.min(0.05, dt); for (const id in agents) update(agents[id], t, s); dt -= s; }
+  chatter(t);
+  render(t); renderOverlays(t); renderCards(t); renderFeed();
   requestAnimationFrame(loop);
 })();
 

@@ -57,12 +57,12 @@ Your answers are saved in the project:
 
 ## QA Office: watch the team work
 
-When `/qa` starts, a live **QA Office** opens in the browser pane: a pixel-art office where every agent sits at their own desk. You can see:
+When `/qa` starts, a live **QA Office** opens in the browser pane: a pixel-art office with a desk for every agent and a lounge (coffee machine, water cooler, sofa, table). Agents **walk to their desk** when they get work and **walk back to the lounge** when they're free, where they chat with each other. During testing, Marcus walks around checking on the team. You can see:
 
-- who is **working** (typing, green code on their screen, a speech bubble saying what they're checking)
+- who is **working** (sitting at their desk typing, green code on their screen, a speech bubble saying what they're checking)
 - who just **found a bug** (red flashing screen, a "!" and the severity)
 - when the QA Lead is **waiting for you** to answer a form ("?")
-- who is **done** (a little jump and a ✓), plus bug counts per severity, the current phase and an activity feed
+- who is **done** (a little jump and a ✓, then off to the lounge), plus bug counts per severity on the whiteboard and header, the current phase, a team roster and an activity feed
 
 Open it yourself anytime from a project folder:
 
@@ -72,19 +72,19 @@ Then visit `http://localhost:4477`. Use **Replay** to watch a finished run again
 
 ## The team
 
-| Role | Agent | What they check |
-|---|---|---|
-| QA Lead | `/qa` skill | Plans the run, coordinates the team, validates findings, owns the report |
-| Functional Test Engineer | `functional-test-engineer` | Features, forms, CRUD, navigation, search, uploads |
-| Exploratory UX Tester | `exploratory-ux-tester` | Confusing flows, dead ends, empty/loading/error states |
-| Technical QA Engineer | `technical-qa-engineer` | Console errors, network failures, hydration, build/lint/types |
-| Edge-Case Test Engineer | `edge-case-test-engineer` | Double submits, odd inputs, multiple tabs, interrupted flows |
-| API Test Engineer | `api-test-engineer` | Endpoints, validation, status codes, error handling |
-| Application Security Tester | `application-security-tester` | Access control, data exposure, sessions, injection (non-destructive) |
-| Data Integrity & Access Control Analyst | `data-integrity-analyst` | Persistence, ownership, roles, login/logout |
-| Accessibility Specialist | `accessibility-specialist` | Keyboard, focus, labels, contrast (WCAG 2.2 AA) |
-| Visual & Responsive QA Engineer | `visual-qa-engineer` | Layouts on mobile, tablet and desktop |
-| Performance Test Engineer | `performance-test-engineer` | Load speed, heavy assets, request counts, layout shift |
+| Name | Role | Agent | What they check |
+|---|---|---|---|
+| Marcus | QA Lead | `/qa` skill | Plans the run, coordinates the team, validates findings, owns the report |
+| Ben | Functional Test Engineer | `functional-test-engineer` | Features, forms, CRUD, navigation, search, uploads |
+| Luna | Exploratory UX Tester | `exploratory-ux-tester` | Confusing flows, dead ends, empty/loading/error states |
+| Kofi | Technical QA Engineer | `technical-qa-engineer` | Console errors, network failures, hydration, build/lint/types |
+| Jax | Edge-Case Test Engineer | `edge-case-test-engineer` | Double submits, odd inputs, multiple tabs, interrupted flows |
+| Omar | API Test Engineer | `api-test-engineer` | Endpoints, validation, status codes, error handling |
+| Rin | Application Security Tester | `application-security-tester` | Access control, data exposure, sessions, injection (non-destructive) |
+| Mei | Data Integrity & Access Control Analyst | `data-integrity-analyst` | Persistence, ownership, roles, login/logout |
+| Amara | Accessibility Specialist | `accessibility-specialist` | Keyboard, focus, labels, contrast (WCAG 2.2 AA) |
+| Sofia | Visual & Responsive QA Engineer | `visual-qa-engineer` | Layouts on mobile, tablet and desktop |
+| Diego | Performance Test Engineer | `performance-test-engineer` | Load speed, heavy assets, request counts, layout shift |
 
 ## Workflow
 
